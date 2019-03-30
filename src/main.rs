@@ -1,3 +1,8 @@
+use structopt::StructOpt;
+
+use pokemon_escape_server::Config;
+
 fn main() {
-    println!("Hello, world!");
+    let config = Config::from_args();
+    config.run();
 }
