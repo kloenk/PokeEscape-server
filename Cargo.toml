@@ -1,7 +1,9 @@
 [package]
 name = "pokemon_escape_server"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/Kloenk/pokemon_escape_server"
 version = "0.1.0"
-authors = ["kloenk <kloenk@kloenk.de>"]
+authors = ["Finn Behrens <me@kloenk.de>"]
 edition = "2018"
 
 [dependencies]
