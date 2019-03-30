@@ -1,11 +1,12 @@
-use std::thread;
+use std::fmt;
 use std::sync::{mpsc, Arc, Mutex};
-
+use std::thread;
 
 pub struct ThreadPool {
     size: usize,
     workers: Vec<Worker>,
-    sender: mpsc::Sender<Job>,
+    sender: mpsc::Sender<Message>,
+    do_verbose: bool,
 }
 
 impl ThreadPool {
@@ -27,38 +28,79 @@ impl ThreadPool {
             workers,
             size,
             sender,
+            do_verbose: false,
         })
     }
 
-     pub fn execute<F>(&self, f: F)
-        where
-            F: FnOnce() + Send + 'static {
+    pub fn verbose(mut self) -> Self {
+        self.do_verbose = true;
+        self
+    }
+
+    pub fn execute<F>(&self, f: F)
+    where
+        F: FnOnce() + Send + 'static,
+    {
         let job = Box::new(f);
 
-        self.sender.send(job).unwrap();
+        self.sender.send(Message::NewJob(job)).unwrap();
     }
+}
+
+impl fmt::Display for ThreadPool {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "ThreadPool with {} workers", self.size)
+    }
+}
+
+impl Drop for ThreadPool {
+    fn drop(&mut self) {
+        if self.do_verbose {
+            println!("signaling workers to stop");
+        }
+        for _ in &mut self.workers {
+            self.sender.send(Message::Terminate).unwrap();
+        }
+
+        for worker in &mut self.workers {
+            if self.do_verbose {
+                println!("Stopping worker {}", worker.id);
+            }
+            if let Some(thread) = worker.thread.take() {
+                thread.join().unwrap();
+            }
+        }
+    }
+}
+
+enum Message {
+    NewJob(Job),
+    Terminate,
 }
 
 struct Worker {
     id: usize,
-    thread: thread::JoinHandle<()>,
+    thread: Option<thread::JoinHandle<()>>,
 }
 
 impl Worker {
-    fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {
-        let thread = thread::spawn(move || {
-            loop {
-                let job = receiver.lock().unwrap().recv().unwrap();
+    fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Message>>>) -> Worker {
+        let thread = thread::spawn(move || loop {
+            let message = receiver.lock().unwrap().recv().unwrap();
 
-                println!("Worker {} got a job; executing", id);
-
-                job.call_box();
+            match message {
+                Message::NewJob(job) => {
+                    job.call_box();
+                }
+                Message::Terminate => {
+                    break;
+                }
             }
         });
 
         Worker {
             id,
-            thread,
+            thread: Some(thread),
         }
     }
 }
