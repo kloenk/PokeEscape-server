@@ -1,11 +1,10 @@
 use colored::*;
+use std::net::TcpListener;
 use std::process;
 use structopt::StructOpt;
-use std::net::TcpListener;
 
-
-pub mod threads;
 pub mod server;
+pub mod threads;
 
 /// Config is a interface designed to use with structopt on the cli, but also to run the code
 ///
@@ -37,12 +36,20 @@ impl Config {
             "PokemonEscape".green(),
             self.port.to_string().yellow()
         );
-        println!("{}: {}", "version".bold().white(), env!("CARGO_PKG_VERSION").blue());
+        println!(
+            "{}: {}",
+            "version".bold().white(),
+            env!("CARGO_PKG_VERSION").blue()
+        );
         if self.verbose {
             println!("Running in {} mode", "Verbose".red());
         }
 
-        println!("listening on {}:{}", self.host.green(), self.port.to_string().green());
+        println!(
+            "listening on {}:{}",
+            self.host.green(),
+            self.port.to_string().green()
+        );
         let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap();
 
         let mut thread_pool = threads::ThreadPool::new(self.threads).unwrap_or_else(|err| {
