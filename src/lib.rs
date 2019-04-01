@@ -1,7 +1,10 @@
 use colored::*;
 use std::process;
 use structopt::StructOpt;
+use std::net::TcpListener;
 
+
+pub mod threads;
 pub mod server;
 
 /// Config is a interface designed to use with structopt on the cli, but also to run the code
@@ -10,15 +13,19 @@ pub mod server;
 #[structopt(raw(setting = "structopt::clap::AppSettings::ColoredHelp"))]
 pub struct Config {
     /// The port to run on
-    #[structopt(short = "p", long = "port", default_value = "8")]
+    #[structopt(short = "p", long = "port", default_value = "1996")]
     pub port: u16,
+
+    /// address to listen on
+    #[structopt(short = "H", long = "host", default_value = "127.0.0.1")]
+    pub host: String,
 
     /// Set application into verbose mode
     #[structopt(short = "v", long = "verbose")]
     pub verbose: bool,
 
-    /// Set application into verbose mode
-    #[structopt(short = "t", long = "threads")]
+    /// Set number of running threads
+    #[structopt(short = "t", long = "threads", default_value = "8")]
     pub threads: usize,
 }
 
@@ -30,17 +37,29 @@ impl Config {
             "PokemonEscape".green(),
             self.port.to_string().yellow()
         );
+        println!("{}: {}", "version".bold().white(), env!("CARGO_PKG_VERSION").blue());
         if self.verbose {
             println!("Running in {} mode", "Verbose".red());
         }
 
-        let thread_pool = server::ThreadPool::new(self.threads).unwrap_or_else(|err| {
+        println!("listening on {}:{}", self.host.green(), self.port.to_string().green());
+        let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap();
+
+        let mut thread_pool = threads::ThreadPool::new(self.threads).unwrap_or_else(|err| {
             println!("Error creating threadPool: {}", err.red());
             process::exit(-2);
         });
 
         if self.verbose {
-            thread_pool.verbose();
+            thread_pool = thread_pool.verbose();
+        }
+
+        for stream in listener.incoming() {
+            let stream = stream.unwrap();
+
+            thread_pool.execute(|| {
+                server::hande_client(stream);
+            })
         }
     }
 }
