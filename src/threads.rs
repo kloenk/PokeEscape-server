@@ -32,7 +32,7 @@ impl ThreadPool {
     /// ## Fails when trying to create 4 threads
     /// ```should_panic
     /// use pokemon_escape_server::threads::ThreadPool;
-    /// let pool = ThreadPool::new(0).unwrap();
+    /// let pool = ThreadPool::new(0).unwrap();     // unwrap panics
     /// ```
     pub fn new(size: usize) -> Result<ThreadPool, String> {
         if size == 0 {

@@ -60,7 +60,7 @@ impl Config {
         });
 
         if self.verbose {
-            thread_pool = thread_pool.verbose();
+            thread_pool.verbose();
         }
 
         for stream in listener.incoming() {
