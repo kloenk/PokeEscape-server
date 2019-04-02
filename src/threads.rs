@@ -63,11 +63,11 @@ impl ThreadPool {
     /// # Example
     /// ```
     /// use pokemon_escape_server::threads::ThreadPool;
-    /// let pool = ThreadPool::new(4).unwrap();
-    /// let pool = pool.verbose();
+    /// let mut pool = ThreadPool::new(4).unwrap();
+    /// pool.verbose();
     /// assert_eq!(pool.is_verbose(), true);
     /// ```
-    pub fn verbose(mut self) -> Self {
+    pub fn verbose(&mut self) -> &Self {
         self.do_verbose = true;
         self
     }
@@ -78,19 +78,19 @@ impl ThreadPool {
     /// ## set into verbose mode
     /// ```
     /// use pokemon_escape_server::threads::ThreadPool;
-    /// let pool = ThreadPool::new(4).unwrap();
-    /// let pool = pool.set_verbose_mode(true);
+    /// let mut pool = ThreadPool::new(4).unwrap();
+    /// pool.set_verbose_mode(true);
     /// assert_eq!(pool.is_verbose(), true);
     /// ```
     ///
     /// ## set out of verbose mode
     /// ```
     /// use pokemon_escape_server::threads::ThreadPool;
-    /// let pool = ThreadPool::new(4).unwrap();
-    /// let pool = pool.set_verbose_mode(false);
+    /// let mut pool = ThreadPool::new(4).unwrap();
+    /// pool.set_verbose_mode(false);
     /// assert_eq!(pool.is_verbose(), false);
     /// ```
-    pub fn set_verbose_mode(mut self, mode: bool) -> Self {
+    pub fn set_verbose_mode(&mut self, mode: bool) -> &Self {
         self.do_verbose = mode;
         self
     }
@@ -100,11 +100,11 @@ impl ThreadPool {
     /// # Example
     /// ```
     /// use pokemon_escape_server::threads::ThreadPool;
-    /// let pool = ThreadPool::new(4).unwrap();
-    /// let pool = pool.verbose();
+    /// let mut pool = ThreadPool::new(4).unwrap();
+    /// pool.verbose();
     /// assert_eq!(pool.is_verbose(), true);
     /// ```
-    pub fn is_verbose(self) -> bool {
+    pub fn is_verbose(&self) -> bool {
         self.do_verbose
     }
 
@@ -117,7 +117,7 @@ impl ThreadPool {
     /// let pool = ThreadPool::new(4).unwrap();
     /// assert_eq!(pool.get_threads(), 4);
     /// ```
-    pub fn get_threads(self) -> usize {
+    pub fn get_threads(&self) -> usize {
         self.size
     }
 
