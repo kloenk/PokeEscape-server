@@ -4,6 +4,8 @@ use std::process;
 use structopt::StructOpt;
 
 pub mod server;
+
+/// threads contains the struct ThreadPool and all helper functions
 pub mod threads;
 
 /// Config is a interface designed to use with structopt on the cli, but also to run the code
@@ -50,7 +52,7 @@ impl Config {
             self.host.green(),
             self.port.to_string().green()
         );
-        let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap();  //FIXME: !!!
+        let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap(); //FIXME: !!!
 
         let mut thread_pool = threads::ThreadPool::new(self.threads).unwrap_or_else(|err| {
             println!("Error creating threadPool: {}", err.red());
@@ -62,11 +64,13 @@ impl Config {
         }
 
         for stream in listener.incoming() {
-            let stream = stream.unwrap();       //FIXME: !!!
+            let stream = stream.unwrap(); //FIXME: !!!
 
-            thread_pool.execute(|| {
-                server::hande_client(stream);
-            })
+            thread_pool
+                .execute(|| {
+                    server::hande_client(stream).unwrap(); //FIXME: unwrap
+                })
+                .unwrap(); // FIXME: unwrap
         }
     }
 }
