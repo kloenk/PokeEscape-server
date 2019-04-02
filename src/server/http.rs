@@ -8,8 +8,7 @@ pub fn hande_client(mut stream: TcpStream) {
         stream.peer_addr().unwrap(),
         "http".blue()
     );
-    let html_content = format!(
-        r#"
+    let html_content = r#"
 <!DOCTYPE html>
 <html>
     <head>
@@ -19,14 +18,13 @@ pub fn hande_client(mut stream: TcpStream) {
     <body>
         <h1>Please provide html content</h1>
     </body>
-</html>"#
-    );
+</html>"#;
 
     let content = format!(
-        r#"HTTP/1.1 200 OK
-Server: PokemonEscape server
+        r#"HTTP/1.1 418 I'M A TEAPOD
+Server: PokémonEscape server
 Content-Type: text/html; charset=utf-8
-Size: {}
+Content-Length: {}
 
 {}"#,
         html_content.len(),

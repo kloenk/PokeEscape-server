@@ -50,7 +50,7 @@ impl Config {
             self.host.green(),
             self.port.to_string().green()
         );
-        let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap();
+        let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap();  //FIXME: !!!
 
         let mut thread_pool = threads::ThreadPool::new(self.threads).unwrap_or_else(|err| {
             println!("Error creating threadPool: {}", err.red());
@@ -62,7 +62,7 @@ impl Config {
         }
 
         for stream in listener.incoming() {
-            let stream = stream.unwrap();
+            let stream = stream.unwrap();       //FIXME: !!!
 
             thread_pool.execute(|| {
                 server::hande_client(stream);
