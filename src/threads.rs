@@ -4,7 +4,6 @@ use std::thread;
 
 /// threads is the lib for the ThreadPool struct
 
-
 /// struct used a type for the ThreadPool
 pub struct ThreadPool {
     size: usize,
@@ -15,21 +14,21 @@ pub struct ThreadPool {
 
 impl ThreadPool {
     /// creates a new `ThreadPool` with the given number of threads
-    /// 
+    ///
     /// # Arguments
     /// * `size` - number of threads to create.
-    /// 
+    ///
     /// # Errors
     /// Errors if the number of threads to create is equal to 0.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ## Create a ThreadPool with 4 threads
     /// ```
     /// use pokemon_escape_server::threads::ThreadPool;
     /// let pool = ThreadPool::new(4).unwrap();  // creates a threadpool with 4 threads
     /// ```
-    /// 
+    ///
     /// ## Fails when trying to create 4 threads
     /// ```should_panic
     /// use pokemon_escape_server::threads::ThreadPool;
@@ -58,9 +57,9 @@ impl ThreadPool {
     }
 
     /// set ThreadPool into verbose mode
-    /// 
+    ///
     /// will print output like wich thread is dropped if set to true
-    /// 
+    ///
     /// # Example
     /// ```
     /// use pokemon_escape_server::threads::ThreadPool;
@@ -74,7 +73,7 @@ impl ThreadPool {
     }
 
     /// sets ThreadPool in the given verbose mode
-    /// 
+    ///
     /// # Example
     /// ## set into verbose mode
     /// ```
@@ -83,7 +82,7 @@ impl ThreadPool {
     /// let pool = pool.set_verbose_mode(true);
     /// assert_eq!(pool.is_verbose(), true);
     /// ```
-    /// 
+    ///
     /// ## set out of verbose mode
     /// ```
     /// use pokemon_escape_server::threads::ThreadPool;
@@ -97,7 +96,7 @@ impl ThreadPool {
     }
 
     /// checks if the ThreadPool is running in verbose mode
-    /// 
+    ///
     /// # Example
     /// ```
     /// use pokemon_escape_server::threads::ThreadPool;
@@ -110,9 +109,9 @@ impl ThreadPool {
     }
 
     /// returns the number of Threads in the ThreadPool
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use pokemon_escape_server::threads::ThreadPool;
     /// let pool = ThreadPool::new(4).unwrap();
@@ -129,11 +128,10 @@ impl ThreadPool {
     {
         let job = Box::new(f);
 
-        match self.sender.send(Message::NewJob(job)) {    //FIXME: unwrap
-            Ok(()) => { return Ok(())},
-            Err(err) => {
-                return Err(err.to_string())
-            },
+        match self.sender.send(Message::NewJob(job)) {
+            //FIXME: unwrap
+            Ok(()) => return Ok(()),
+            Err(err) => return Err(err.to_string()),
         };
     }
 }
@@ -152,7 +150,7 @@ impl Drop for ThreadPool {
             println!("signaling workers to stop");
         }
         for _ in &mut self.workers {
-            self.sender.send(Message::Terminate).unwrap();  //FIXME: unwrap
+            self.sender.send(Message::Terminate).unwrap(); //FIXME: unwrap
         }
 
         for worker in &mut self.workers {
