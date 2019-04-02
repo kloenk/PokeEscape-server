@@ -61,6 +61,7 @@ impl Config {
 
         if self.verbose {
             thread_pool.verbose();
+            println!("created {} with {} workers", "ThreadPool".blue(), thread_pool.get_threads().to_string().green());
         }
 
         for stream in listener.incoming() {
