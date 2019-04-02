@@ -69,6 +69,7 @@ impl ThreadPool {
     /// ```
     pub fn verbose(&mut self) -> &Self {
         self.do_verbose = true;
+        println!("running ThreadPool in verbose mode"); //TODO: colors
         self
     }
 
@@ -139,7 +140,7 @@ impl ThreadPool {
 impl fmt::Display for ThreadPool {
     /// standart formater for print! macro
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "ThreadPool with {} workers", self.size)
+        write!(f, "ThreadPool with {} workers", self.size) // TODO: Colors
     }
 }
 
