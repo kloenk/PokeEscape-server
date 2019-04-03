@@ -119,6 +119,59 @@ impl<'a> Server<'a> {
         }
         self.do_verbose
     }
+
+    /// This function negotiates the protocoll to use between the client and the Server
+    /// it calles the function of the protocoll, uses &TcpStream and a buffer as arguments
+    pub fn negotiate(mut stream: TcpStream) -> Result<(), String> {
+      let mut reader = match stream.try_clone() {
+        Ok(second_stream) => BufReader::new(second_stream),   // create BufReader
+        Err(err) => return Err(err.to_string()),
+      };
+      let mut line = String::new();
+      match reader.read_line(&mut line) {
+        Ok(_) => (),    // would return usize of read bytes
+        Err(err) => return Err(err.to_string()),
+      }
+
+      if line.starts_with("POKEMON-ESCAPE_") {
+        // run pokemon server
+      } else if line.contains("HTTP/1.1") {
+        // start http server
+      } else {
+        match stream.write(format!("POKEMON-ESCAPE-SERVER_{}\n", env!("CARGO_PKG_VERSION")).as_bytes()) {
+          Ok(_) => (), // would return usize of written bytes
+          Err(err) => return Err(err.to_string()),
+        } // close connection
+      }
+      match stream.flush() {
+        Ok(_) => (),
+        Err(err) => return Err(err.to_string()),
+      }
+      Ok(())
+    }
+}
+
+/// starts the connection to the client
+pub fn handle_pokemon_client(mut stream: TcpStream) -> Result<TcpStream, ()> {
+    let mut reader = BufReader::new(stream.try_clone().unwrap()); //FIXME: unwrap
+    loop {
+        let mut line = String::new();
+        match reader.read_line(&mut line) {
+            Err(_err) => return Err(()), //FIXME: return error?
+            Ok(_) => (),                 // would return usize with number read bytes
+        };
+
+        stream.write(line.as_bytes()).unwrap(); //FIXME: unwrap
+        stream.flush().unwrap(); //FIXME: unwrap
+
+        if line.to_lowercase().starts_with("quit") {
+            // send quit
+            stream.write(b"Bye").unwrap(); //FIXME: unwrap
+            break;
+        }
+    }
+    stream.flush().unwrap(); //FIXME: unwrap
+    Ok(stream)
 }
 
 /// Negotiates the protocol betwen the client and the server.
@@ -152,25 +205,3 @@ pub fn hande_client(mut stream: TcpStream) -> Result<(), ()> {
     Ok(())
 }
 
-/// starts the connection to the client
-pub fn handle_pokemon_client(mut stream: TcpStream) -> Result<TcpStream, ()> {
-    let mut reader = BufReader::new(stream.try_clone().unwrap()); //FIXME: unwrap
-    loop {
-        let mut line = String::new();
-        match reader.read_line(&mut line) {
-            Err(_err) => return Err(()), //FIXME: return error?
-            Ok(_) => (),                 // would return usize with number read bytes
-        };
-
-        stream.write(line.as_bytes()).unwrap(); //FIXME: unwrap
-        stream.flush().unwrap(); //FIXME: unwrap
-
-        if line.to_lowercase().starts_with("quit") {
-            // send quit
-            stream.write(b"Bye").unwrap(); //FIXME: unwrap
-            break;
-        }
-    }
-    stream.flush().unwrap(); //FIXME: unwrap
-    Ok(stream)
-}
