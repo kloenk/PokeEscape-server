@@ -1,4 +1,3 @@
-use super::threads::ThreadPool;
 use colored::*;
 use std::io::prelude::*;
 use std::io::BufReader;
@@ -12,28 +11,30 @@ pub mod http;
 /// 
 /// # panics
 /// has many unwrap functions
-pub fn negotiate(mut conf: Job) {
+pub fn negotiate(mut conf: Job) -> Result<(), String>{  //TODO: add return types
     let mut reader = match conf.stream.try_clone() {
       Ok(stream) => BufReader::new(stream),
-      Err(err) => panic!(err),
+      Err(err) => return Err(err.to_string()),
     };
     let mut line = String::new();
+    reader.read_line(&mut line).unwrap();
     if conf.verbose {
         let addr = conf.stream.peer_addr().unwrap().to_string();
-        println!("got {} from {}", line.yellow(), addr.green());
+        println!("got {} from {}", line.trim().yellow(), addr.green());
     }
-    reader.read_line(&mut line).unwrap();
 
     if line.starts_with("POKEMON-ESCAPE_") {
         // run pokemon server
         eprintln!("fix POKEMON-ESCAPE-CLIENT");
+        conf.stream
+            .write(format!("POKEMON-ESCAPE-SERVER_{}\n", env!("CARGO_PKG_VERSION")).as_bytes()).unwrap();
     } else if line.contains("HTTP/1.1") {
         http::handle_client(&mut conf.stream, reader).unwrap();
     } else {
-        conf.stream
-            .write(format!("POKEMON-ESCAPE-SERVER_{}\n", env!("CARGO_PKG_VERSION")).as_bytes()).unwrap();
+        conf.stream.write(b"Protocol mismatch.").unwrap();  //FIXME: unwrap
     }
     conf.stream.flush().unwrap();
+    Ok(())
 }
 
 /// starts the connection to the client

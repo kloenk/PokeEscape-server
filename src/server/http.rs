@@ -10,7 +10,7 @@ use std::net::TcpStream;
 /// and then is returning the TcpStream in a Result Box.
 pub fn handle_client(
     stream: &mut TcpStream,
-    reader: BufReader<TcpStream>,
+    _reader: BufReader<TcpStream>,
 ) -> Result<&mut TcpStream, String> {
     println!(
         "Client {} requestd {}",

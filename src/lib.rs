@@ -70,14 +70,14 @@ impl Config {
 
         for stream in listener.incoming() {
             let stream = stream.unwrap();   // FIXME: unwrap
-            let mut conf = server::Job{
+            let conf = server::Job{
                 stream,
                 verbose: self.verbose,
             };
 
             thread_pool
                 .execute(move || {
-                    server::negotiate(conf);
+                    server::negotiate(conf).unwrap();   //FIXME: unwrap
                 })
                 .unwrap(); // FIXME: unwrap
         }
