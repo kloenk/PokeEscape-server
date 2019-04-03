@@ -123,7 +123,7 @@ impl ThreadPool {
     }
 
     /// execute send a function into a thread to be executed there
-    pub fn execute<F>(&self, f: F) -> Result<(), String>
+    pub fn execute<'a, F>(&self, f: F) -> Result<(), String>
     where
         F: FnOnce() + Send + 'static,
     {

@@ -1,4 +1,5 @@
 use super::threads::ThreadPool;
+use colored::*;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::net::TcpStream;
@@ -6,149 +7,33 @@ use std::net::TcpStream;
 /// handling code for the http server
 pub mod http;
 
-pub struct Server<'a> {
-    /// the used ThreadPool for the server
-    pool: &'a mut ThreadPool,
-
-    /// verbose mode of the server
-    do_verbose: bool, //TODO: add channels for IPC
-}
-
-impl<'a> Server<'a> {
-    /// creates a new `Server` with the given number of threads
-    ///
-    /// # Arguments
-    /// * `pool` - `ThreadPool` to use for Jobs
-    ///
-    /// # Errors
-    ///
-    /// FIXME: Error listening
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use pokemon_escape_server::server::Server;
-    /// use pokemon_escape_server::threads::ThreadPool;
-    /// let mut pool = ThreadPool::new(4).unwrap();
-    /// let mut server = Server::new(&mut pool).unwrap();
-    /// ```
-    pub fn new<'b>(pool: &'b mut ThreadPool) -> Result<Server<'b>, String> {
-        Ok(Server {
-            pool,
-            do_verbose: false,
-        })
+/// This function negotiates the protocoll to use between the client and the Server
+/// it calles the function of the protocoll, uses &TcpStream and a buffer as arguments
+/// 
+/// # panics
+/// has many unwrap functions
+pub fn negotiate(mut conf: Job) {
+    let mut reader = match conf.stream.try_clone() {
+      Ok(stream) => BufReader::new(stream),
+      Err(err) => panic!(err),
+    };
+    let mut line = String::new();
+    if conf.verbose {
+        let addr = conf.stream.peer_addr().unwrap().to_string();
+        println!("got {} from {}", line.yellow(), addr.green());
     }
+    reader.read_line(&mut line).unwrap();
 
-    /// set Server into verbose mode
-    ///
-    /// will print output like wich thread is dropped if set to true
-    ///
-    /// # Example
-    /// ```
-    /// use pokemon_escape_server::server::Server;
-    /// use pokemon_escape_server::threads::ThreadPool;
-    /// let mut pool = ThreadPool::new(4).unwrap();
-    /// let mut server = Server::new(&mut pool).unwrap();
-    /// server.verbose();
-    /// assert_eq!(server.is_verbose(), true);
-    /// ```
-    pub fn verbose(&mut self) -> &Self {
-        self.do_verbose = true;
-        self.pool.verbose();
-        self
-    }
-
-    /// sets server in the given verbose mode
-    ///
-    /// # Example
-    /// ## set into verbose mode
-    /// ```
-    /// use pokemon_escape_server::server::Server;
-    /// use pokemon_escape_server::threads::ThreadPool;
-    /// let mut pool = ThreadPool::new(4).unwrap();
-    /// let mut server = Server::new(&mut pool).unwrap();
-    /// server.set_verbose_mode(true);
-    /// assert_eq!(server.is_verbose(), true);
-    /// ```
-    ///
-    /// ## set out of verbose mode
-    /// ```
-    /// use pokemon_escape_server::server::Server;
-    /// use pokemon_escape_server::threads::ThreadPool;
-    /// let mut pool = ThreadPool::new(4).unwrap();
-    /// let mut server = Server::new(&mut pool).unwrap();
-    /// server.set_verbose_mode(false);
-    /// assert_eq!(server.is_verbose(), false);
-    /// ```
-    pub fn set_verbose_mode(&mut self, mode: bool) -> &Self {
-        self.do_verbose = mode;
-        self.pool.set_verbose_mode(mode);
-        self
-    }
-
-    /// returns if the server is running in verbose mode
-    ///
-    /// # Panics
-    /// Panics if verbose mode of pool differs from own verbose mode
-    ///
-    /// # Example
-    ///
-    /// ## verbose does not differ
-    ///
-    /// ```
-    /// use pokemon_escape_server::server::Server;
-    /// use pokemon_escape_server::threads::ThreadPool;
-    /// let mut pool = ThreadPool::new(4).unwrap();
-    /// let mut server = Server::new(&mut pool).unwrap();
-    /// server.verbose();
-    /// assert_eq!(server.is_verbose(), true);
-    /// ```
-    ///
-    /// ## verbose mode differs
-    /// ```should_panic
-    /// use pokemon_escape_server::server::Server;
-    /// use pokemon_escape_server::threads::ThreadPool;
-    /// let mut pool = ThreadPool::new(4).unwrap();
-    /// pool.verbose(); // sets pool into verbose
-    /// let mut server = Server::new(&mut pool).unwrap();
-    /// assert_eq!(server.is_verbose(), false);   // panics
-    /// ```
-    pub fn is_verbose(&self) -> bool {
-        if self.pool.is_verbose() != self.do_verbose {
-            panic!("verbose mode error");
-        }
-        self.do_verbose
-    }
-
-    /// This function negotiates the protocoll to use between the client and the Server
-    /// it calles the function of the protocoll, uses &TcpStream and a buffer as arguments
-    pub fn negotiate(mut stream: TcpStream) -> Result<(), String> {
-      let mut reader = match stream.try_clone() {
-        Ok(second_stream) => BufReader::new(second_stream),   // create BufReader
-        Err(err) => return Err(err.to_string()),
-      };
-      let mut line = String::new();
-      match reader.read_line(&mut line) {
-        Ok(_) => (),    // would return usize of read bytes
-        Err(err) => return Err(err.to_string()),
-      }
-
-      if line.starts_with("POKEMON-ESCAPE_") {
+    if line.starts_with("POKEMON-ESCAPE_") {
         // run pokemon server
-      } else if line.contains("HTTP/1.1") {
-        // start http server
-      } else {
-        match stream.write(format!("POKEMON-ESCAPE-SERVER_{}\n", env!("CARGO_PKG_VERSION")).as_bytes()) {
-          Ok(_) => (), // would return usize of written bytes
-          Err(err) => return Err(err.to_string()),
-        } // close connection
-      }
-      match stream.flush() {
-        Ok(_) => (),
-        Err(err) => return Err(err.to_string()),
-      }
-      Ok(())
+        eprintln!("fix POKEMON-ESCAPE-CLIENT");
+    } else if line.contains("HTTP/1.1") {
+        http::handle_client(&mut conf.stream, reader).unwrap();
+    } else {
+        conf.stream
+            .write(format!("POKEMON-ESCAPE-SERVER_{}\n", env!("CARGO_PKG_VERSION")).as_bytes()).unwrap();
     }
+    conf.stream.flush().unwrap();
 }
 
 /// starts the connection to the client
@@ -167,7 +52,7 @@ pub fn handle_pokemon_client(mut stream: TcpStream) -> Result<TcpStream, ()> {
         if line.to_lowercase().starts_with("quit") {
             // send quit
             stream.write(b"Bye").unwrap(); //FIXME: unwrap
-            break;
+            break; // exit loop
         }
     }
     stream.flush().unwrap(); //FIXME: unwrap
@@ -195,7 +80,7 @@ pub fn hande_client(mut stream: TcpStream) -> Result<(), ()> {
         stream.flush().unwrap(); //FIXME: unwrap
         handle_pokemon_client(stream).unwrap(); //FIXME: unwrap
     } else if buffer.starts_with(b"GET") {
-        http::handle_client(stream).unwrap(); //FIXME: unwrap
+        // http::handle_client(stream).unwrap(); //FIXME: unwrap
     } else {
         stream.write(b"Protocol mismatch.\n").unwrap(); //FIXME: unwrap
         stream.flush().unwrap(); //FIXME: unwrap
@@ -205,3 +90,8 @@ pub fn hande_client(mut stream: TcpStream) -> Result<(), ()> {
     Ok(())
 }
 
+
+pub struct Job {
+  pub stream: TcpStream,
+  pub verbose: bool,
+}
