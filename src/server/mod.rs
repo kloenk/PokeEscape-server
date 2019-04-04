@@ -3,52 +3,33 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::net::TcpStream;
 
+use super::error::Error;
+
 /// handling code for the http server
 pub mod http;
 
 /// This function negotiates the protocoll to use between the client and the Server
 /// it calles the function of the protocoll, uses &TcpStream and a buffer as arguments
-pub fn negotiate(mut conf: Job) -> Result<(), String>{  //TODO: add return types
-    let mut reader = match conf.stream.try_clone() {
-      Ok(stream) => BufReader::new(stream),
-      Err(err) => return Err(err.to_string()),  // return type
-    };
+pub fn negotiate(mut conf: Job) -> Result<(), Error>{  //TODO: add return types
+    let mut reader = BufReader::new(conf.stream.try_clone()?);
     let mut line = String::new();
-    match reader.read_line(&mut line) {
-        Ok(_) => (),    // would return read bytes
-        Err(err) => return Err(err.to_string()),        // return type
-    };
+    reader.read_line(&mut line)?;
     if conf.verbose {
-        let addr = match conf.stream.peer_addr() {
-            Ok(addr) => addr.to_string(),
-            Err(err) => return Err(err.to_string()),    // return type
-        };
+        let addr = conf.stream.peer_addr()?.to_string();
         println!("got {} from {}", line.trim().yellow(), addr.green());
     }
 
     if line.starts_with("POKEMON-ESCAPE_") {
         // run pokemon server
         eprintln!("fix POKEMON-ESCAPE-CLIENT");
-        match conf.stream
-            .write(format!("POKEMON-ESCAPE-SERVER_{}\n", env!("CARGO_PKG_VERSION")).as_bytes()) {
-                Ok(_) => (),    // would return bytes written
-                Err(err) => return Err(err.to_string()),    // return type
-            };
+        conf.stream
+            .write(format!("POKEMON-ESCAPE-SERVER_{}\n", env!("CARGO_PKG_VERSION")).as_bytes())?;
     } else if line.contains("HTTP/1.1") {
-        match http::handle_client(&mut conf.stream, reader) {
-            Ok(stream) => stream,
-            Err(err) => return Err(err.to_string()),    // return type
-        };
+        http::handle_client(&mut conf.stream, reader)?;
     } else {
-        match conf.stream.write(b"Protocol mismatch.") {
-            Ok(_) => (),    // would return bytes written
-            Err(err) => return Err(err.to_string()),    //return type
-        };  //FIXME: unwrap
+        conf.stream.write(b"Protocol mismatch.")?;
     }
-    match conf.stream.flush() {
-        Ok(_) => (),
-        Err(err) => return Err(err.to_string()),    // return type
-    };
+    conf.stream.flush()?;
     Ok(())  // return type
 }
 

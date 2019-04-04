@@ -8,6 +8,9 @@ pub mod server;
 /// threads contains the struct ThreadPool and all helper functions
 pub mod threads;
 
+/// module that holds error structures for use in `Result<T, error::Error>`
+pub mod error;
+
 /// Config is a interface designed to use with structopt on the cli, but also to run the code
 ///
 #[derive(StructOpt, Debug)]
