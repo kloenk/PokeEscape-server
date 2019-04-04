@@ -1,6 +1,9 @@
 use std::fmt;
-use std::convert;
 use std::io;
+
+// tests as sub file
+#[cfg(test)]
+mod test;
 
 pub struct Error {
     kind: ErrorKind,
