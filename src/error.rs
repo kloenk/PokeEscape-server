@@ -39,10 +39,19 @@ impl Error {
     }
 }
 
+/// print trait
 impl fmt::Display for Error {
     /// standart formater for print! macro
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Error of Kind {}", self.kind) // TODO: Colors
+    }
+}
+
+/// Debug print trait
+impl fmt::Debug for Error {
+    /// formater for `Debug` in print! macro
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "(Error of Kind {})", self.kind)
     }
 }
 
