@@ -13,10 +13,6 @@ pub mod http;
 pub fn negotiate(mut conf: Job) -> Result<(), Error>{  //TODO: add return types
     let mut reader = BufReader::new(conf.stream.try_clone()?);
     let mut line = String::new();
-   /* match reader.read_line(&mut line) {
-        Ok(_) => (),    // would return read bytes
-        Err(err) => return Err(err),        // return type
-    };*/
     reader.read_line(&mut line)?;
     if conf.verbose {
         let addr = conf.stream.peer_addr()?.to_string();

@@ -80,7 +80,7 @@ impl Config {
 
             thread_pool
                 .execute(move || {
-                    server::negotiate(conf);   //FIXME: unwrap
+                    server::negotiate(conf).unwrap();   //FIXME: unwrap
                 })
                 .unwrap(); // FIXME: unwrap
         }
