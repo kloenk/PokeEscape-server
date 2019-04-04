@@ -1,5 +1,6 @@
 use colored::*;
 use std::io::prelude::*;
+use std::io::BufReader;
 use std::net::TcpStream;
 
 /// This function is called when the client protocol seems to be HTTP
@@ -7,7 +8,10 @@ use std::net::TcpStream;
 /// # Returns
 /// The function flushes the stream to ensure that all data is written,
 /// and then is returning the TcpStream in a Result Box.
-pub fn handle_client(mut stream: TcpStream) -> Result<TcpStream, String> {
+pub fn handle_client(
+    stream: &mut TcpStream,
+    _reader: BufReader<TcpStream>,
+) -> Result<&mut TcpStream, String> {
     println!(
         "Client {} requestd {}",
         stream.peer_addr().unwrap(), //FIXME: unwrap

@@ -60,15 +60,24 @@ impl Config {
         });
 
         if self.verbose {
-            thread_pool = thread_pool.verbose();
+            thread_pool.verbose();
+            println!(
+                "created {} with {} workers",
+                "ThreadPool".blue(),
+                thread_pool.get_threads().to_string().green()
+            );
         }
 
         for stream in listener.incoming() {
-            let stream = stream.unwrap(); //FIXME: !!!
+            let stream = stream.unwrap();   // FIXME: unwrap
+            let conf = server::Job{
+                stream,
+                verbose: self.verbose,
+            };
 
             thread_pool
-                .execute(|| {
-                    server::hande_client(stream).unwrap(); //FIXME: unwrap
+                .execute(move || {
+                    server::negotiate(conf).unwrap();   //FIXME: unwrap
                 })
                 .unwrap(); // FIXME: unwrap
         }
