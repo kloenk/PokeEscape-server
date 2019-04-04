@@ -97,8 +97,25 @@ pub enum ErrorKind {
 impl ErrorKind {
     pub fn to_string(&self) -> String {
         match self {
-            ErrorKind::IoNotFound => String::from("io_NotFound"),
-            _ => String::from("Unknown")
+            ErrorKind::IoNotFound => String::from("IoNotFound"),
+            ErrorKind::IoPermissionDenied => String::from("IoPermissionDenied"),
+            ErrorKind::IoConnectionRefused => String::from("IoConnectionRefused"),
+            ErrorKind::IoConnectionReset => String::from("IoConnectionReset"),
+            ErrorKind::IoConnectionAborted => String::from("IoConnectionAborted"),
+            ErrorKind::IoNotConnected => String::from("IoNotConnected"),
+            ErrorKind::IoAddrInUse => String::from("IoAddrInUse"),
+            ErrorKind::IoAddrNotAvailable => String::from("IoAddrNotAvailable"),
+            ErrorKind::IoBrokenPipe => String::from("IoBrokenPipe"),
+            ErrorKind::IoAlreadyExists => String::from("IoAlreadyExists"),
+            ErrorKind::IoWouldBlock => String::from("IoWouldBlock"),
+            ErrorKind::IoInvalidInput => String::from("IoInvalidInput"),
+            ErrorKind::IoInvalidData => String::from("IoInvalidData"),
+            ErrorKind::IoTimedOut => String::from("IoTimedOut"),
+            ErrorKind::IowriteZero => String::from("IoWriteZero"),
+            ErrorKind::IoInterrupted => String::from("IoInterrupted"),
+            ErrorKind::IoOther => String::from("IoOther"),
+            ErrorKind::IoUnexpectedEof => String::from("IoUnexpectedEof"),
+            ErrorKind::Unknown(data) => format!("Unknown({})", data),
         }
     }
 }
