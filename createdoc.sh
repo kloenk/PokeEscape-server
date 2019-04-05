@@ -9,7 +9,7 @@ if [ "$TRAVIS_BRANCH" == "master" ]; then
 <html>
     <head>
         <meta charset="utf-8" lang="en"/>
-        <meta http-equiv="refresh" content="0; URL='/pokemon_escape_server/doc/pokemon_escape_server/'" />
+        <meta http-equiv="refresh" content="0; URL='/pokemon_escape_server/doc/pokemon_escape_server/doc/pokemon_escape_server/'" />
     </head>
 </html>
 EOF
