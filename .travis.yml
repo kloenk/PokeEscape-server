@@ -7,3 +7,16 @@ matrix:
   allow_failures:
     - rust: nightly
   fast_finish: true
+
+script:
+  - cargo test --verbose
+  - cargo doc --target-dir public/
+  - cd public
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+  keep_history: true
+  on:
+    branch: master
