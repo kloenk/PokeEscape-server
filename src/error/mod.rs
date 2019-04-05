@@ -6,21 +6,25 @@ use std::io;
 mod test;
 
 pub struct Error {
-    kind: ErrorKind,
+    my_kind: ErrorKind,
 }
 
 impl Error {
     /// creates a new Error
     pub fn new(kind: ErrorKind) -> Error {
-        Error { kind }
+        Error { my_kind: kind }
     }
 
-    fn error_kind_as_str(kind: io::ErrorKind) -> ErrorKind {
+    pub fn kind(&self) -> ErrorKind {
+        self.my_kind.clone()
+    }
+
+    fn io_to_kind(kind: io::ErrorKind) -> ErrorKind {
         match kind {
             io::ErrorKind::NotFound => ErrorKind::IoNotFound,
             io::ErrorKind::PermissionDenied => ErrorKind::IoPermissionDenied,
             io::ErrorKind::ConnectionRefused => ErrorKind::IoConnectionRefused,
-            io::ErrorKind::ConnectionReset => ErrorKind::IoConnectionAborted,
+            io::ErrorKind::ConnectionReset => ErrorKind::IoConnectionReset,
             io::ErrorKind::ConnectionAborted => ErrorKind::IoConnectionAborted,
             io::ErrorKind::NotConnected => ErrorKind::IoNotConnected,
             io::ErrorKind::AddrInUse => ErrorKind::IoAddrInUse,
@@ -44,7 +48,7 @@ impl Error {
 impl fmt::Display for Error {
     /// standart formater for print! macro
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Error of Kind {}", self.kind.to_string()) // TODO: Colors
+        write!(f, "Error of Kind {}", self.my_kind.to_string())
     }
 }
 
@@ -52,25 +56,39 @@ impl fmt::Display for Error {
 impl fmt::Debug for Error {
     /// formater for `Debug` in print! macro
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "(Error of Kind {})", self.kind.to_string())
+        write!(f, "(Error of Kind {})", self.my_kind.to_string())
     }
 }
 
 impl std::convert::From<std::io::Error> for Error {
     fn from(io_error: std::io::Error) -> Self {
-        let kind = Error::error_kind_as_str(io_error.kind());
-        Error { kind }
+        let kind = Error::io_to_kind(io_error.kind());
+        Error { my_kind: kind }
+    }
+}
+
+impl std::convert::From<std::io::ErrorKind> for Error {
+    fn from(io_kind: std::io::ErrorKind) -> Self {
+        let kind = Error::io_to_kind(io_kind);
+        Error { my_kind: kind }
     }
 }
 
 impl std::convert::From<std::string::String> for Error {
     fn from(string: String) -> Self {
         Error {
-            kind: ErrorKind::Unknown(string), // FIXME: better doing
+            my_kind: ErrorKind::Other(string),
         }
     }
 }
 
+impl std::cmp::PartialEq for Error {
+    fn eq(&self, other: &Error) -> bool {
+        self.my_kind == other.my_kind
+    }
+}
+
+#[derive(Clone, PartialEq)]
 pub enum ErrorKind {
     /// Io Not Found error, transformed `from std::io::ErrorKind::NotFound`
     IoNotFound,
@@ -177,5 +195,11 @@ impl fmt::Debug for ErrorKind {
     /// formater for `Debug` in print! macro
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "(Error: {})", self.convert_to_string())
+    }
+}
+
+impl std::convert::From<std::io::ErrorKind> for ErrorKind {
+    fn from(io_kind: std::io::ErrorKind) -> Self {
+        Error::io_to_kind(io_kind)
     }
 }

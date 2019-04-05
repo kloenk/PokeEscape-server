@@ -11,7 +11,6 @@ pub mod http;
 /// This function negotiates the protocoll to use between the client and the Server
 /// it calles the function of the protocoll, uses &TcpStream and a buffer as arguments
 pub fn negotiate(mut conf: Job) -> Result<(), Error> {
-    //TODO: add return types
     let mut reader = BufReader::new(conf.stream.try_clone()?);
     let mut line = String::new();
     reader.read_line(&mut line)?;
