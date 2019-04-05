@@ -3,6 +3,8 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::net::TcpStream;
 
+use super::super::error::Error;
+
 /// This function is called when the client protocol seems to be HTTP
 ///
 /// # Returns
@@ -11,12 +13,8 @@ use std::net::TcpStream;
 pub fn handle_client(
     stream: &mut TcpStream,
     _reader: BufReader<TcpStream>,
-) -> Result<&mut TcpStream, String> {
-    println!(
-        "Client {} requestd {}",
-        stream.peer_addr().unwrap(), //FIXME: unwrap
-        "http".blue()
-    );
+) -> Result<&mut TcpStream, Error> {
+    println!("Client {} requestd {}", stream.peer_addr()?, "http".blue());
     let html_content = r#"
 <!DOCTYPE html>
 <html>
@@ -39,7 +37,7 @@ Content-Length: {}
         html_content.len(),
         html_content
     );
-    stream.write(content.as_bytes()).unwrap(); //FIXME: unwrap
-    stream.flush().unwrap(); //FIXME: unwrap
+    stream.write(content.as_bytes())?;
+    stream.flush()?;
     Ok(stream)
 }

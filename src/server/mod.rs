@@ -10,7 +10,7 @@ pub mod http;
 
 /// This function negotiates the protocoll to use between the client and the Server
 /// it calles the function of the protocoll, uses &TcpStream and a buffer as arguments
-pub fn negotiate(mut conf: Job) -> Result<(), Error>{  //TODO: add return types
+pub fn negotiate(mut conf: Job) -> Result<(), Error> {
     let mut reader = BufReader::new(conf.stream.try_clone()?);
     let mut line = String::new();
     reader.read_line(&mut line)?;
@@ -30,7 +30,7 @@ pub fn negotiate(mut conf: Job) -> Result<(), Error>{  //TODO: add return types
         conf.stream.write(b"Protocol mismatch.")?;
     }
     conf.stream.flush()?;
-    Ok(())  // return type
+    Ok(()) // return type
 }
 
 /// starts the connection to the client
@@ -56,8 +56,7 @@ pub fn handle_pokemon_client(mut stream: TcpStream) -> Result<TcpStream, ()> {
     Ok(stream)
 }
 
-
 pub struct Job {
-  pub stream: TcpStream,
-  pub verbose: bool,
+    pub stream: TcpStream,
+    pub verbose: bool,
 }
