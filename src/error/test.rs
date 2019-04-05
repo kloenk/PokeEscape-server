@@ -61,7 +61,7 @@ fn error_kind_to_string() {
     assert_eq!(kind.to_string(), String::from("IoTimedOut"));
 
     // IowriteZero
-    let kind = ErrorKind::IowriteZero;
+    let kind = ErrorKind::IoWriteZero;
     assert_eq!(kind.to_string(), String::from("IoWriteZero"));
 
     // IoInterrupted
@@ -75,6 +75,10 @@ fn error_kind_to_string() {
     // IoUnexpectedEof
     let kind = ErrorKind::IoUnexpectedEof;
     assert_eq!(kind.to_string(), String::from("IoUnexpectedEof"));
+
+    // Other
+    let kind = ErrorKind::Other(String::from("test"));
+    assert_eq!(kind.to_string(), String::from("Other(test)"));
 
     // Unknow(String)
     let kind = ErrorKind::Unknown(String::from("test"));

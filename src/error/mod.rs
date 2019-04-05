@@ -33,7 +33,7 @@ impl Error {
             io::ErrorKind::InvalidInput => ErrorKind::IoInvalidInput,
             io::ErrorKind::InvalidData => ErrorKind::IoInvalidData,
             io::ErrorKind::TimedOut => ErrorKind::IoTimedOut,
-            io::ErrorKind::WriteZero => ErrorKind::IowriteZero,
+            io::ErrorKind::WriteZero => ErrorKind::IoWriteZero,
             io::ErrorKind::Interrupted => ErrorKind::IoInterrupted,
             io::ErrorKind::Other => ErrorKind::IoOther,
             io::ErrorKind::UnexpectedEof => ErrorKind::IoUnexpectedEof,
@@ -76,29 +76,70 @@ impl std::convert::From<std::string::String> for Error {
 }
 
 pub enum ErrorKind {
+
+    /// Io Not Found error, transformed `from std::io::ErrorKind::NotFound`
     IoNotFound,
+
+    /// Io Perssion Denied error, transformed from `std::io::ErrorKind::PermissionDenied
     IoPermissionDenied,
+
+    /// Io Connection Refused error, transformed from `std::io::ErrorKind::ConnectionRefused`
     IoConnectionRefused,
+
+    /// Io ConnectionReset error, transformed from `std::io::ErrorKind::ConnectionReset`
     IoConnectionReset,
+
+    /// Io ConnectionAborted error, transformed from `std::io::ErrorKind::ConnectionAborted`
     IoConnectionAborted,
+
+    /// Io Not Connected error, transformed from `std::io::ErrorKind::NotConnected`
     IoNotConnected,
+
+    /// IO Addr In Use error, transformed from `std::io::ErrorKind::AddrInUse`
     IoAddrInUse,
+
+    /// Io Addr Not Available error, transformed from `std::io::ErrorKind::AddrNotAvailable`
     IoAddrNotAvailable,
+
+    /// Io Broken Pipe error, transformed from `std::io::ErrorKind::BrokenPipe`
     IoBrokenPipe,
+
+    /// IO Already Exists error, transformed from `std::io::ErrorKind::AlreadyExists`
     IoAlreadyExists,
+
+    /// IO Would Block error, transformed from `std::io::ErrorKind::WouldBlock`
     IoWouldBlock,
+
+    /// IO Invalid Input error, transformed from `std::io::ErrorKind::InvalidInput`
     IoInvalidInput,
+
+    /// IO Invalid Data error, transformed from `std::io::ErrorKind::InvalidData`
     IoInvalidData,
+
+    /// IO Timed Out error, transformed from `std::io::ErrorKind::TimedOut`
     IoTimedOut,
-    IowriteZero,
+
+    /// IO Write Zero error, transformed from `std::io::ErrorKind::WriteZero`
+    IoWriteZero,
+
+    /// IO Interrupted error, transformed from `std::io::ErrorKind::Interrupted`
     IoInterrupted,
+
+    /// IO Other error, transformed from `std::io::ErrorKind::Other`
     IoOther,
+
+    /// IO Unexpected EOF error, transformed from `std::io::ErrorKind::UnexpectedEof
     IoUnexpectedEof,
+
+    /// Other error, used for string to error conversion
+    Other(String),
+
+    /// Unknown error, used for default in match statements
     Unknown(String),
 }
 
 impl ErrorKind {
-    pub fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String { // FIXME: should not be implemented?
         match self {
             ErrorKind::IoNotFound => String::from("IoNotFound"),
             ErrorKind::IoPermissionDenied => String::from("IoPermissionDenied"),
@@ -114,10 +155,11 @@ impl ErrorKind {
             ErrorKind::IoInvalidInput => String::from("IoInvalidInput"),
             ErrorKind::IoInvalidData => String::from("IoInvalidData"),
             ErrorKind::IoTimedOut => String::from("IoTimedOut"),
-            ErrorKind::IowriteZero => String::from("IoWriteZero"),
+            ErrorKind::IoWriteZero => String::from("IoWriteZero"),
             ErrorKind::IoInterrupted => String::from("IoInterrupted"),
             ErrorKind::IoOther => String::from("IoOther"),
             ErrorKind::IoUnexpectedEof => String::from("IoUnexpectedEof"),
+            ErrorKind::Other(data) => format!("Other({})", data),
             ErrorKind::Unknown(data) => format!("Unknown({})", data),
         }
     }
