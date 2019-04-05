@@ -8,11 +8,8 @@ matrix:
     - rust: nightly
   fast_finish: true
 
-build-doc:
-  provider: script
-  script: cargo doc --target-dir public/; cd public
-  on:
-    branch: master
+after_success:
+  - ./createdoc.sh
 
 deploy:
   provider: pages
