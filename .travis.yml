@@ -8,16 +8,16 @@ matrix:
     - rust: nightly
   fast_finish: true
 
+build-doc:
+  provider: script
+  script: cargo doc --target-dir public/; cd public
+  on:
+    branch: master
+
 deploy:
   provider: pages
   skip_cleanup: true
   github_token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
   keep_history: true
-  on:
-    branch: master
-
-deploy:
-  provider: script
-  script: cargo doc --target-dir public/; cd public
   on:
     branch: master
