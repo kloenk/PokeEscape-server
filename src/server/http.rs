@@ -14,11 +14,7 @@ pub fn handle_client(
     stream: &mut TcpStream,
     _reader: BufReader<TcpStream>,
 ) -> Result<&mut TcpStream, Error> {
-    println!(
-        "Client {} requestd {}",
-        stream.peer_addr()?,
-        "http".blue()
-    );
+    println!("Client {} requestd {}", stream.peer_addr()?, "http".blue());
     let html_content = r#"
 <!DOCTYPE html>
 <html>
