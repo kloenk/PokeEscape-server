@@ -41,13 +41,13 @@
 <span id="41">41</span>
 <span id="42">42</span>
 <span id="43">43</span>
-<span id="44">44</span>
-<span id="45">45</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">colored</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">BufReader</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">net</span>::<span class="ident">TcpStream</span>;
+
+<span class="kw">use</span> <span class="kw">super</span>::<span class="kw">super</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
 
 <span class="doccomment">/// This function is called when the client protocol seems to be HTTP</span>
 <span class="doccomment">///</span>
@@ -57,12 +57,8 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">handle_client</span>(
     <span class="ident">stream</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">TcpStream</span>,
     <span class="ident">_reader</span>: <span class="ident">BufReader</span><span class="op">&lt;</span><span class="ident">TcpStream</span><span class="op">&gt;</span>,
-) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">TcpStream</span>, <span class="ident">String</span><span class="op">&gt;</span> {
-    <span class="macro">println</span><span class="macro">!</span>(
-        <span class="string">&quot;Client {} requestd {}&quot;</span>,
-        <span class="ident">stream</span>.<span class="ident">peer_addr</span>().<span class="ident">unwrap</span>(), <span class="comment">//FIXME: unwrap</span>
-        <span class="string">&quot;http&quot;</span>.<span class="ident">blue</span>()
-    );
+) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">TcpStream</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;Client {} requestd {}&quot;</span>, <span class="ident">stream</span>.<span class="ident">peer_addr</span>()<span class="question-mark">?</span>, <span class="string">&quot;http&quot;</span>.<span class="ident">blue</span>());
     <span class="kw">let</span> <span class="ident">html_content</span> <span class="op">=</span> <span class="string">r#&quot;
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
@@ -85,8 +81,8 @@ Content-Length: {}
         <span class="ident">html_content</span>.<span class="ident">len</span>(),
         <span class="ident">html_content</span>
     );
-    <span class="ident">stream</span>.<span class="ident">write</span>(<span class="ident">content</span>.<span class="ident">as_bytes</span>()).<span class="ident">unwrap</span>(); <span class="comment">//FIXME: unwrap</span>
-    <span class="ident">stream</span>.<span class="ident">flush</span>().<span class="ident">unwrap</span>(); <span class="comment">//FIXME: unwrap</span>
+    <span class="ident">stream</span>.<span class="ident">write</span>(<span class="ident">content</span>.<span class="ident">as_bytes</span>())<span class="question-mark">?</span>;
+    <span class="ident">stream</span>.<span class="ident">flush</span>()<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(<span class="ident">stream</span>)
 }
 </pre></div>

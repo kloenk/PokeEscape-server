@@ -161,15 +161,15 @@
         }
 
         <span class="kw">for</span> <span class="ident">stream</span> <span class="kw">in</span> <span class="ident">listener</span>.<span class="ident">incoming</span>() {
-            <span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">stream</span>.<span class="ident">unwrap</span>();   <span class="comment">// FIXME: unwrap</span>
-            <span class="kw">let</span> <span class="ident">conf</span> <span class="op">=</span> <span class="ident">server</span>::<span class="ident">Job</span>{
+            <span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">stream</span>.<span class="ident">unwrap</span>(); <span class="comment">// FIXME: unwrap</span>
+            <span class="kw">let</span> <span class="ident">conf</span> <span class="op">=</span> <span class="ident">server</span>::<span class="ident">Job</span> {
                 <span class="ident">stream</span>,
                 <span class="ident">verbose</span>: <span class="self">self</span>.<span class="ident">verbose</span>,
             };
 
             <span class="ident">thread_pool</span>
                 .<span class="ident">execute</span>(<span class="kw">move</span> <span class="op">||</span> {
-                    <span class="ident">server</span>::<span class="ident">negotiate</span>(<span class="ident">conf</span>).<span class="ident">unwrap</span>();   <span class="comment">//FIXME: unwrap</span>
+                    <span class="ident">server</span>::<span class="ident">negotiate</span>(<span class="ident">conf</span>).<span class="ident">unwrap</span>(); <span class="comment">//FIXME: unwrap</span>
                 })
                 .<span class="ident">unwrap</span>(); <span class="comment">// FIXME: unwrap</span>
         }
