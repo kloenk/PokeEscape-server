@@ -139,7 +139,7 @@ pub enum ErrorKind {
 }
 
 impl ErrorKind {
-    pub fn to_string(&self) -> String { // FIXME: should not be implemented?
+    fn convert_to_string(&self) -> String {
         match self {
             ErrorKind::IoNotFound => String::from("IoNotFound"),
             ErrorKind::IoPermissionDenied => String::from("IoPermissionDenied"),
@@ -162,5 +162,25 @@ impl ErrorKind {
             ErrorKind::Other(data) => format!("Other({})", data),
             ErrorKind::Unknown(data) => format!("Unknown({})", data),
         }
+    }
+
+    pub fn error_string(&self) -> String {
+        self.convert_to_string()
+    }
+}
+
+/// print trait
+impl fmt::Display for ErrorKind {
+    /// standart formater for print! macro
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Error: {}", self.convert_to_string())
+    }
+}
+
+/// Debug print trait
+impl fmt::Debug for ErrorKind {
+    /// formater for `Debug` in print! macro
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "(Error: {})", self.convert_to_string())
     }
 }
