@@ -2,6 +2,7 @@
 
 #!/bin/bash
 if [ "$TRAVIS_BRANCH" == "master" ]; then
-  echo $TRAVIS_RUST_VERSION
-  cargo doc --target-dir public
+  if [ "$TRAVIS_RUST_VERSION" == "stable"]; then
+    cargo doc --target-dir public
+  fi
 fi
