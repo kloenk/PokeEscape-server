@@ -12,9 +12,7 @@ pub struct Error {
 impl Error {
     /// creates a new Error
     pub fn new(kind: ErrorKind) -> Error {
-        Error {
-            kind,
-        }
+        Error { kind }
     }
 
     fn error_kind_as_str(kind: io::ErrorKind) -> ErrorKind {
@@ -61,22 +59,19 @@ impl fmt::Debug for Error {
 impl std::convert::From<std::io::Error> for Error {
     fn from(io_error: std::io::Error) -> Self {
         let kind = Error::error_kind_as_str(io_error.kind());
-        Error {
-            kind,
-        }
+        Error { kind }
     }
 }
 
 impl std::convert::From<std::string::String> for Error {
     fn from(string: String) -> Self {
         Error {
-            kind: ErrorKind::Unknown(string),   // FIXME: better doing
+            kind: ErrorKind::Unknown(string), // FIXME: better doing
         }
     }
 }
 
 pub enum ErrorKind {
-
     /// Io Not Found error, transformed `from std::io::ErrorKind::NotFound`
     IoNotFound,
 
