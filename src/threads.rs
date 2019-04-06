@@ -25,13 +25,13 @@ impl ThreadPool {
     ///
     /// ## Create a ThreadPool with 4 threads
     /// ```
-    /// use pokemon_escape_server::threads::ThreadPool;
+    /// use poke_escape_server::threads::ThreadPool;
     /// let pool = ThreadPool::new(4).unwrap();  // creates a threadpool with 4 threads
     /// ```
     ///
     /// ## Fails when trying to create 4 threads
     /// ```should_panic
-    /// use pokemon_escape_server::threads::ThreadPool;
+    /// use poke_escape_server::threads::ThreadPool;
     /// let pool = ThreadPool::new(0).unwrap();     // unwrap panics
     /// ```
     pub fn new(size: usize) -> Result<ThreadPool, String> {
@@ -62,7 +62,7 @@ impl ThreadPool {
     ///
     /// # Example
     /// ```
-    /// use pokemon_escape_server::threads::ThreadPool;
+    /// use poke_escape_server::threads::ThreadPool;
     /// let mut pool = ThreadPool::new(4).unwrap();
     /// pool.verbose();
     /// assert_eq!(pool.is_verbose(), true);
@@ -78,7 +78,7 @@ impl ThreadPool {
     /// # Example
     /// ## set into verbose mode
     /// ```
-    /// use pokemon_escape_server::threads::ThreadPool;
+    /// use poke_escape_server::threads::ThreadPool;
     /// let mut pool = ThreadPool::new(4).unwrap();
     /// pool.set_verbose_mode(true);
     /// assert_eq!(pool.is_verbose(), true);
@@ -86,7 +86,7 @@ impl ThreadPool {
     ///
     /// ## set out of verbose mode
     /// ```
-    /// use pokemon_escape_server::threads::ThreadPool;
+    /// use poke_escape_server::threads::ThreadPool;
     /// let mut pool = ThreadPool::new(4).unwrap();
     /// pool.set_verbose_mode(false);
     /// assert_eq!(pool.is_verbose(), false);
@@ -100,7 +100,7 @@ impl ThreadPool {
     ///
     /// # Example
     /// ```
-    /// use pokemon_escape_server::threads::ThreadPool;
+    /// use poke_escape_server::threads::ThreadPool;
     /// let mut pool = ThreadPool::new(4).unwrap();
     /// pool.verbose();
     /// assert_eq!(pool.is_verbose(), true);
@@ -114,7 +114,7 @@ impl ThreadPool {
     /// # Examples
     ///
     /// ```
-    /// use pokemon_escape_server::threads::ThreadPool;
+    /// use poke_escape_server::threads::ThreadPool;
     /// let pool = ThreadPool::new(4).unwrap();
     /// assert_eq!(pool.get_threads(), 4);
     /// ```

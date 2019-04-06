@@ -1,5 +1,5 @@
 [package]
-name = "pokemon_escape_server"
+name = "poke_escape_server"
 license = "GPL-3.0-or-later"
 repository = "https://github.com/Kloenk/pokemon_escape_server"
 version = "0.1.0"
