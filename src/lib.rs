@@ -38,7 +38,7 @@ impl Config {
     pub fn run(&self) {
         println!(
             "Starting {} server on port: {}",
-            "PokemonEscape".green(),
+            "PokeEscape".green(),
             self.port.to_string().yellow()
         );
         println!(

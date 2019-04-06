@@ -19,11 +19,11 @@ pub fn negotiate(mut conf: Job) -> Result<(), Error> {
         println!("got {} from {}", line.trim().yellow(), addr.green());
     }
 
-    if line.starts_with("POKEMON-ESCAPE_") {
-        // run pokemon server
-        eprintln!("fix POKEMON-ESCAPE-CLIENT");
+    if line.starts_with("POKE-ESCAPE_") {
+        // run PokeEscape server
+        eprintln!("fix POKE-ESCAPE-CLIENT");
         conf.stream
-            .write(format!("POKEMON-ESCAPE-SERVER_{}\n", env!("CARGO_PKG_VERSION")).as_bytes())?;
+            .write(format!("POKE-ESCAPE-SERVER_{}\n", env!("CARGO_PKG_VERSION")).as_bytes())?;
     } else if line.contains("HTTP/1.1") {
         http::handle_client(&mut conf.stream, reader)?;
     } else {
