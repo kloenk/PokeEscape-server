@@ -19,5 +19,6 @@ deploy:
   local_dir: ./public/
   on:
     branch: master
+    rust: stable
 
 cache: cargo
