@@ -82,6 +82,18 @@ impl std::convert::From<std::string::String> for Error {
     }
 }
 
+impl std::convert::From<semver::SemVerError> for Error {
+    fn from(err: semver::SemVerError) -> Self {
+        let content = match err {
+            semver::SemVerError::ParseError(data) => data,
+            _ => panic!("cannot be not ParseError"),
+        };
+        Error {
+            my_kind: ErrorKind::Other(content),
+        }
+    }
+}
+
 impl std::cmp::PartialEq for Error {
     fn eq(&self, other: &Error) -> bool {
         self.my_kind == other.my_kind

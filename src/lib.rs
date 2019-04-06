@@ -2,6 +2,7 @@ use colored::*;
 use std::net::TcpListener;
 use std::process;
 use structopt::StructOpt;
+use semver::Version;
 
 pub mod server;
 
@@ -41,10 +42,14 @@ impl Config {
             "PokeEscape".green(),
             self.port.to_string().yellow()
         );
+
+        // get server version
+        let server_version = Version::parse(env!("CARGO_PKG_VERSION")).unwrap(); // FIXME: unwrap
+
         println!(
             "{}: {}",
             "version".bold().white(),
-            env!("CARGO_PKG_VERSION").blue()
+            server_version.to_string().blue()
         );
         if self.verbose {
             println!("Running in {} mode", "Verbose".red());
@@ -71,11 +76,13 @@ impl Config {
             );
         }
 
+
         for stream in listener.incoming() {
             let stream = stream.unwrap(); // FIXME: unwrap
             let conf = server::Job {
                 stream,
                 verbose: self.verbose,
+                version: server_version.clone(),
             };
 
             thread_pool

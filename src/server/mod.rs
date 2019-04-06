@@ -2,6 +2,7 @@ use colored::*;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::net::TcpStream;
+use semver::Version;
 
 use super::error::Error;
 
@@ -23,7 +24,12 @@ pub fn negotiate(mut conf: Job) -> Result<(), Error> {
         // run PokeEscape server
         eprintln!("fix POKE-ESCAPE-CLIENT");
         conf.stream
-            .write(format!("POKE-ESCAPE-SERVER_{}\n", env!("CARGO_PKG_VERSION")).as_bytes())?;
+            .write(format!("POKE-ESCAPE-SERVER_{}\n", conf.version.to_string()).as_bytes())?;
+        let v = &line[12..];
+        let client = Client::new(v, conf.stream.try_clone()?)?;
+        if conf.verbose {
+            println!("Client with version {} connected", client.version.to_string());
+        }
     } else if line.contains("HTTP/1.1") {
         http::handle_client(&mut conf.stream, reader)?;
     } else {
@@ -33,30 +39,22 @@ pub fn negotiate(mut conf: Job) -> Result<(), Error> {
     Ok(()) // return type
 }
 
-/// starts the connection to the client
-pub fn handle_pokemon_client(mut stream: TcpStream) -> Result<TcpStream, ()> {
-    let mut reader = BufReader::new(stream.try_clone().unwrap()); //FIXME: unwrap
-    loop {
-        let mut line = String::new();
-        match reader.read_line(&mut line) {
-            Err(_err) => return Err(()), //FIXME: return error?
-            Ok(_) => (),                 // would return usize with number read bytes
-        };
-
-        stream.write(line.as_bytes()).unwrap(); //FIXME: unwrap
-        stream.flush().unwrap(); //FIXME: unwrap
-
-        if line.to_lowercase().starts_with("quit") {
-            // send quit
-            stream.write(b"Bye").unwrap(); //FIXME: unwrap
-            break; // exit loop
-        }
-    }
-    stream.flush().unwrap(); //FIXME: unwrap
-    Ok(stream)
-}
-
 pub struct Job {
     pub stream: TcpStream,
     pub verbose: bool,
+    pub version: Version,
+}
+
+pub struct Client {
+    pub version: Version,
+    pub stream: TcpStream,
+}
+
+impl Client {
+    pub fn new(version: &str, stream: TcpStream) -> Result<Self, Error> {
+        Ok(Client {
+            version: Version::parse(version)?,
+            stream: stream,
+        })
+    }
 }
