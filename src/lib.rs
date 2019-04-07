@@ -12,6 +12,9 @@ pub mod threads;
 /// module that holds error structures for use in `Result<T, error::Error>`
 pub mod error;
 
+/// map loader
+pub mod map;
+
 /// Config is a interface designed to use with structopt on the cli, but also to run the code
 ///
 #[derive(StructOpt, Debug)]
@@ -32,6 +35,10 @@ pub struct Config {
     /// Set number of running threads
     #[structopt(short = "t", long = "threads", default_value = "8")]
     pub threads: usize,
+
+    /// set path to search for maps
+    #[structopt(short = "P", long = "path", default_value = "maps/")]
+    pub path: String,
 }
 
 impl Config {
@@ -83,6 +90,7 @@ impl Config {
                 stream,
                 verbose: self.verbose,
                 version: server_version.clone(),
+                path: self.path.clone(),
             };
 
             thread_pool

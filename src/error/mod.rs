@@ -89,7 +89,7 @@ impl std::convert::From<semver::SemVerError> for Error {
             _ => panic!("cannot be not ParseError"),
         };
         Error {
-            my_kind: ErrorKind::Other(content),
+            my_kind: ErrorKind::Other(content), // TODO: add semvrError to errorkind struct
         }
     }
 }
