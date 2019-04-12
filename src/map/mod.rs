@@ -167,6 +167,12 @@ impl Map {
     pub fn version(&self) -> &Version {
         &self.p_version
     }
+
+    /// set the map into verbose mode
+    pub fn verbose(&mut self) -> &mut Self {
+        self.p_verbose = true;
+        self
+    }
 }
 
 /// unwrap_some unwraps a some value and returns a Result<T, Error>
