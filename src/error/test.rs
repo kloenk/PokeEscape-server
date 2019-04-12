@@ -251,3 +251,6 @@ mod error_kind_error_string {
         assert_eq!(kind.error_string(), String::from("Unknown(test)"));
     }
 }
+
+
+// FIXME: tests
