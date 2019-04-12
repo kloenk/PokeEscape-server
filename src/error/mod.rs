@@ -178,7 +178,7 @@ pub enum ErrorKind {
     FormatNotSupported,
 
     /// Field Not Exists, raised when a important field is missing in config
-    FieldNotExists,
+    FieldNotExists, // maybe ad field, so the user can see wich field is missing
 
     /// No Version Supplied error, used if the version of the client is none
     NoVersionSupplied,

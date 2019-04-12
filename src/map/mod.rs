@@ -3,6 +3,7 @@ use semver::Version;
 use std::fs;
 use std::str::FromStr;
 use toml::Value;
+use std::collections::HashMap;
 
 use super::error::Error;
 
@@ -10,7 +11,7 @@ use super::error::Error;
 /// this is not a deserialisable struct, so every map can live at top level
 pub struct MapPlaces {
     p_version: Version,
-    p_maps: Vec<Map>,
+    p_maps: HashMap<String, Map>,
 }
 
 impl MapPlaces {
@@ -28,7 +29,7 @@ impl MapPlaces {
         };
         let version = Version::from_str(version)?;
 
-        let mut maps = Vec::new();
+        let mut maps = HashMap::new();
 
         if version < Version::new(99, 99, 99) {
             // check in reserve order for version
@@ -80,8 +81,8 @@ impl Map {
         }
     }
 
-    pub fn from_conf(toml: &toml::Value, verbose: bool) -> Result<Vec<Self>, Error> {
-        if !toml["Maps"]["maps"].is_array() {
+    pub fn from_conf(toml: &toml::Value, verbose: bool) -> Result<HashMap<String, Self>, Error> {
+        if toml["Maps"].get("maps") == None {
             return Err(Error::new_field_not_exists());
         }
 
@@ -90,7 +91,7 @@ impl Map {
             None => return Err(Error::new_field_not_exists()),
         };
 
-        let mut maps = Vec::new();
+        let mut maps = HashMap::new();
 
         for map in maps_names {
             let map = match map.as_str() {
@@ -100,24 +101,49 @@ impl Map {
                     "err"
                 } // FIXME: better error handling
             };
-            if !toml[map].is_table() {
-                eprintln!("Map {} not found in config", map);
+
+            if verbose {
+                print!("Loading infos of map {}... ", map.green());
             }
 
-            maps.push(Self::from_conf_one(&toml[map], map.to_string(), verbose)?);
+            if toml.get(map) == None {
+                if verbose {
+                    println!("[{}]: {}", "failed".red(), "not found in config".red());
+                } else {
+                    eprintln!("Map {} not found in config", map.blue());
+                }
+                continue
+            }
+
+            let map = match Self::from_conf_one(&toml[map], map.to_string(), verbose) {
+                Ok(map) => map,
+                Err(err) => {
+                    println!("[{}]: {}", "failed".red(), err.to_string().red());
+                    continue;
+                }
+            };
+
+            if verbose {
+                println!("[{}]: Version: {}", "Ok".green(), map.version().to_string().blue());
+            }
+
+            maps.insert(map.name().clone(), map);
         }
 
         Ok(maps)
     }
 
     fn from_conf_one(toml: &toml::Value, name: String, verbose: bool) -> Result<Self, Error> {
-        let file: String = unwrap_some(toml["path"].as_str())?.to_string();
-        let version = unwrap_some(toml["version"].as_str())?;
+        let file = unwrap_some( unwrap_some( toml.get("path") )?.as_str() )?.to_string();
+        let version = unwrap_some( unwrap_some( toml.get("version") )?.as_str() )?;
         let version = Version::from_str(version)?;
 
-        let format_str = match toml["format"].as_str() {
-            Some(format) => format,
-            None => "JSON", // defaults to json
+        let format_str = match toml.get("format") {
+            Some(format_str) => match format_str.as_str() {
+                Some(format) => format,
+                None => "JSON",
+            },
+            None => "JSON",
         };
 
         let mut format: MapFormat;
@@ -129,6 +155,17 @@ impl Map {
         }
 
         Ok(Self::new(name, file, version, format, verbose))
+    }
+
+
+    /// returns the name of the Map it hold information about
+    pub fn name(&self) -> &String {
+        &self.p_name
+    }
+
+    /// returns the version of the Map
+    pub fn version(&self) -> &Version {
+        &self.p_version
     }
 }
 
