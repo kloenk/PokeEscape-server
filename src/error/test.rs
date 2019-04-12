@@ -238,7 +238,7 @@ mod error_kind_error_string {
         let kind = ErrorKind::VersionNotParsable;
         assert_eq!(kind.error_string(), String::from("VersionNotParsable"));
     }
-    
+
     #[test]
     fn other() {
         let kind = ErrorKind::Other(String::from("test"));
@@ -251,6 +251,5 @@ mod error_kind_error_string {
         assert_eq!(kind.error_string(), String::from("Unknown(test)"));
     }
 }
-
 
 // FIXME: tests

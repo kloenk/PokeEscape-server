@@ -101,12 +101,14 @@ impl std::convert::From<toml::de::Error> for Error {
     }
 }
 
-impl std::convert::From<semver::SemVerError> for Error{
+impl std::convert::From<semver::SemVerError> for Error {
     fn from(err: semver::SemVerError) -> Self {
         let error = match err {
             semver::SemVerError::ParseError(error) => error,
         };
-        Error { my_kind: ErrorKind::VersionNotParsable(error) }
+        Error {
+            my_kind: ErrorKind::VersionNotParsable(error),
+        }
     }
 }
 
@@ -183,7 +185,6 @@ pub enum ErrorKind {
 
     /// Version Not Parsable error, used if the version cannot be parsed
     VersionNotParsable(String),
-
 
     /// Other error, used for string to error conversion
     Other(String),
