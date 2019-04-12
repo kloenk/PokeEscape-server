@@ -1,0 +1,8 @@
+[Maps]
+version = "0.1.0"
+maps = ["Hello World"]
+
+["Hello World"]
+version = "0.1.0"
+path = "./maps/Hello_World.map"
+format = "json"

@@ -11,12 +11,23 @@ pub struct Error {
 
 impl Error {
     /// creates a new Error
-    pub fn new(kind: ErrorKind) -> Error {
+    pub fn new(kind: ErrorKind) -> Self {
         Error { my_kind: kind }
     }
 
+    /// returns the internal type of the error
     pub fn kind(&self) -> ErrorKind {
         self.my_kind.clone()
+    }
+
+    /// creates a new error of the type NoVersionSupplied
+    pub fn new_no_version_supplied() -> Self {
+        Self::new(ErrorKind::NoVersionSupplied)
+    }
+
+    /// creates a new error of the Kind FieldNotExists
+    pub fn new_field_not_exists() -> Self {
+        Self::new(ErrorKind::FieldNotExists)
     }
 
     fn io_to_kind(kind: io::ErrorKind) -> ErrorKind {
@@ -82,6 +93,23 @@ impl std::convert::From<std::string::String> for Error {
     }
 }
 
+impl std::convert::From<toml::de::Error> for Error {
+    fn from(err: toml::de::Error) -> Self {
+        Error {
+            my_kind: ErrorKind::Other(err.to_string()), // FIXME: create own error type
+        }
+    }
+}
+
+impl std::convert::From<semver::SemVerError> for Error{
+    fn from(err: semver::SemVerError) -> Self {
+        let error = match err {
+            semver::SemVerError::ParseError(error) => error,
+        };
+        Error { my_kind: ErrorKind::VersionNotParsable(error) }
+    }
+}
+
 impl std::cmp::PartialEq for Error {
     fn eq(&self, other: &Error) -> bool {
         self.my_kind == other.my_kind
@@ -144,6 +172,19 @@ pub enum ErrorKind {
     /// IO Unexpected EOF error, transformed from `std::io::ErrorKind::UnexpectedEof
     IoUnexpectedEof,
 
+    /// Format Not Supported, raised when the format defined in config.toml is not supported
+    FormatNotSupported,
+
+    /// Field Not Exists, raised when a important field is missing in config
+    FieldNotExists,
+
+    /// No Version Supplied error, used if the version of the client is none
+    NoVersionSupplied,
+
+    /// Version Not Parsable error, used if the version cannot be parsed
+    VersionNotParsable(String),
+
+
     /// Other error, used for string to error conversion
     Other(String),
 
@@ -172,6 +213,10 @@ impl ErrorKind {
             ErrorKind::IoInterrupted => String::from("IoInterrupted"),
             ErrorKind::IoOther => String::from("IoOther"),
             ErrorKind::IoUnexpectedEof => String::from("IoUnexpectedEof"),
+            ErrorKind::FormatNotSupported => String::from("FormatNotSupported"),
+            ErrorKind::FieldNotExists => String::from("FieldNotExists"),
+            ErrorKind::NoVersionSupplied => String::from("NoVersionSupplied"),
+            ErrorKind::VersionNotParsable(data) => format!("VersionNotParsable({})", data),
             ErrorKind::Other(data) => format!("Other({})", data),
             ErrorKind::Unknown(data) => format!("Unknown({})", data),
         }

@@ -222,6 +222,24 @@ mod error_kind_error_string {
     }
 
     #[test]
+    fn format_not_supported() {
+        let kind = ErrorKind::FormatNotSupported;
+        assert_eq!(kind.error_string(), String::from("FormatNotSupported"));
+    }
+
+    #[test]
+    fn no_version_supplied() {
+        let kind = ErrorKind::NoVersionSupplied;
+        assert_eq!(kind.error_string(), String::from("NoVersionSupplied"));
+    }
+
+    #[test]
+    fn version_not_parsable() {
+        let kind = ErrorKind::VersionNotParsable;
+        assert_eq!(kind.error_string(), String::from("VersionNotParsable"));
+    }
+    
+    #[test]
     fn other() {
         let kind = ErrorKind::Other(String::from("test"));
         assert_eq!(kind.error_string(), String::from("Other(test)"));

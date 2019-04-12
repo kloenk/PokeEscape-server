@@ -11,6 +11,9 @@ pub mod threads;
 /// module that holds error structures for use in `Result<T, error::Error>`
 pub mod error;
 
+/// module containing map loader
+pub mod map;
+
 /// Config is a interface designed to use with structopt on the cli, but also to run the code
 ///
 #[derive(StructOpt, Debug)]
@@ -31,6 +34,10 @@ pub struct Config {
     /// Set number of running threads
     #[structopt(short = "t", long = "threads", default_value = "8")]
     pub threads: usize,
+
+    /// config file for maps (toml)
+    #[structopt(short = "c", long = "config", default_value = "./config.toml")]
+    pub config: String,
 }
 
 impl Config {
@@ -49,6 +56,9 @@ impl Config {
         if self.verbose {
             println!("Running in {} mode", "Verbose".red());
         }
+
+        // load map
+        let maps = map::MapPlaces::new(&self.config, self.verbose);
 
         println!(
             "listening on {}:{}",
