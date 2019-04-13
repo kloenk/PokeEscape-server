@@ -26,8 +26,8 @@ impl Error {
     }
 
     /// creates a new error of the Kind FieldNotExists
-    pub fn new_field_not_exists() -> Self {
-        Self::new(ErrorKind::FieldNotExists)
+    pub fn new_field_not_exists(field: String) -> Self {
+        Self::new(ErrorKind::FieldNotExists(field))
     }
 
     fn io_to_kind(kind: io::ErrorKind) -> ErrorKind {
@@ -178,7 +178,8 @@ pub enum ErrorKind {
     FormatNotSupported,
 
     /// Field Not Exists, raised when a important field is missing in config
-    FieldNotExists, // maybe ad field, so the user can see wich field is missing
+    /// also raised if file is of the wrong type
+    FieldNotExists(String),
 
     /// No Version Supplied error, used if the version of the client is none
     NoVersionSupplied,
@@ -215,7 +216,7 @@ impl ErrorKind {
             ErrorKind::IoOther => String::from("IoOther"),
             ErrorKind::IoUnexpectedEof => String::from("IoUnexpectedEof"),
             ErrorKind::FormatNotSupported => String::from("FormatNotSupported"),
-            ErrorKind::FieldNotExists => String::from("FieldNotExists"),
+            ErrorKind::FieldNotExists(data) => format!("FieldNotExists({})", data),
             ErrorKind::NoVersionSupplied => String::from("NoVersionSupplied"),
             ErrorKind::VersionNotParsable(data) => format!("VersionNotParsable({})", data),
             ErrorKind::Other(data) => format!("Other({})", data),

@@ -1,9 +1,9 @@
 use colored::*;
 use semver::Version;
+use std::collections::HashMap;
 use std::fs;
 use std::str::FromStr;
 use toml::Value;
-use std::collections::HashMap;
 
 use super::error::Error;
 
@@ -23,9 +23,14 @@ impl MapPlaces {
 
         let file = fs::read_to_string(file)?;
         let content: Value = toml::from_str(file.as_str())?;
+
+        if content.get("Maps") == None {
+            return Err(Error::new_field_not_exists("Maps".to_string()));
+        }
+
         let version = match content["Maps"]["version"].as_str() {
             Some(ver) => ver,
-            None => return Err(Error::new(super::error::ErrorKind::FieldNotExists)),
+            None => return Err(Error::new_field_not_exists("Maps.version".to_string())),
         };
         let version = Version::from_str(version)?;
 
@@ -83,12 +88,12 @@ impl Map {
 
     pub fn from_conf(toml: &toml::Value, verbose: bool) -> Result<HashMap<String, Self>, Error> {
         if toml["Maps"].get("maps") == None {
-            return Err(Error::new_field_not_exists());
+            return Err(Error::new_field_not_exists("Maps.maps".to_string()));
         }
 
         let maps_names = match toml["Maps"]["maps"].as_array() {
             Some(maps) => maps,
-            None => return Err(Error::new_field_not_exists()),
+            None => return Err(Error::new_field_not_exists("Maps.maps".to_string())),
         };
 
         let mut maps = HashMap::new();
@@ -97,9 +102,9 @@ impl Map {
             let map = match map.as_str() {
                 Some(map) => map,
                 None => {
-                    eprintln!("Critical error reading a map!");
-                    "err"
-                } // FIXME: better error handling
+                    eprintln!("Map name could not be converted to string");
+                    continue; // parse next map
+                }
             };
 
             if verbose {
@@ -112,7 +117,7 @@ impl Map {
                 } else {
                     eprintln!("Map {} not found in config", map.blue());
                 }
-                continue
+                continue;
             }
 
             let map = match Self::from_conf_one(&toml[map], map.to_string(), verbose) {
@@ -124,7 +129,11 @@ impl Map {
             };
 
             if verbose {
-                println!("[{}]: Version: {}", "Ok".green(), map.version().to_string().blue());
+                println!(
+                    "[{}]: Version: {}",
+                    "Ok".green(),
+                    map.version().to_string().blue()
+                );
             }
 
             maps.insert(map.name().clone(), map);
@@ -134,9 +143,23 @@ impl Map {
     }
 
     fn from_conf_one(toml: &toml::Value, name: String, verbose: bool) -> Result<Self, Error> {
-        let file = unwrap_some( unwrap_some( toml.get("path") )?.as_str() )?.to_string();
-        let version = unwrap_some( unwrap_some( toml.get("version") )?.as_str() )?;
-        let version = Version::from_str(version)?;
+        let file = match toml.get("path") {
+            Some(path) => path,
+            None => return Err(Error::new_field_not_exists(format!("{}.path", name))),
+        };
+        let file = match file.as_str() {
+            Some(file) => file.to_string(),
+            None => return Err(Error::new_field_not_exists(format!("{}.path", name))),
+        };
+
+        let version = match toml.get("version") {
+            Some(version) => version,
+            None => return Err(Error::new_field_not_exists(format!("{}.version", name))),
+        };
+        let version = match version.as_str() {
+            Some(version) => Version::from_str(version)?,
+            None => return Err(Error::new_field_not_exists(format!("{}.version", name))),
+        };
 
         let format_str = match toml.get("format") {
             Some(format_str) => match format_str.as_str() {
@@ -146,7 +169,7 @@ impl Map {
             None => "JSON",
         };
 
-        let mut format: MapFormat;
+        let format: MapFormat;
 
         if format_str.to_lowercase() == "json" {
             format = MapFormat::JSON;
@@ -156,7 +179,6 @@ impl Map {
 
         Ok(Self::new(name, file, version, format, verbose))
     }
-
 
     /// returns the name of the Map it hold information about
     pub fn name(&self) -> &String {
@@ -173,13 +195,10 @@ impl Map {
         self.p_verbose = true;
         self
     }
-}
 
-/// unwrap_some unwraps a some value and returns a Result<T, Error>
-fn unwrap_some<T>(value: Option<T>) -> Result<T, Error> {
-    match value {
-        Some(value) => Ok(value),
-        None => Err(Error::new_field_not_exists()),
+    /// returns the verbose state of the Map
+    pub fn is_verbose(&self) -> bool {
+        self.p_verbose
     }
 }
 

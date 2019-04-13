@@ -57,8 +57,14 @@ impl Config {
             println!("Running in {} mode", "Verbose".red());
         }
 
-        // load map
-        let maps = map::MapPlaces::new(&self.config, self.verbose);
+        // load maps
+        let maps = match map::MapPlaces::new(&self.config, self.verbose) {
+            Ok(maps) => maps,
+            Err(err) => {
+                eprintln!("Error loading maps: {}", err.to_string().red());
+                std::process::exit(20);
+            }
+        };
 
         println!(
             "listening on {}:{}",
