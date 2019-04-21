@@ -74,12 +74,41 @@ impl MapPlaces {
 /// Map holds a map ready to send to a client
 pub struct Map {
     p_name: String,
+    p_features: Option<Vec<String>>,
+    p_map: Vec<[u8; 20]>,   // 20 collums - dynamic rows
 }
 
 impl Map {
     /// returns the name of the map
     pub fn name(&self) -> String {
         self.p_name.clone() // returns a clone
+    }
+
+    /// check if the feature exists
+    pub fn feature(&self, feature: &String) -> bool {
+        match &self.p_features {
+            Some(t) => t.contains(feature),
+            None => false,
+        }
+    }
+
+    /// returns a list of features of the map
+    pub fn feature_list(&self) -> String {
+        match &self.p_features {
+            Some(t) => {
+                let mut ret = String::new();
+                let mut runned = false;
+                for v in t {
+                    if runned {
+                        ret += ", ";
+                    }
+                    ret += v;
+                    runned = true;
+                }
+                ret
+            }
+            None => "".to_string()
+        }
     }
 }
 
@@ -98,6 +127,8 @@ struct MapInfo {
 
     /// format of the given map file
     p_format: MapFormat,
+
+    //TODO: add authors
 
     /// set to true if the mapload should operate in verbose mode
     p_verbose: bool,
