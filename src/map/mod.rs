@@ -2,6 +2,7 @@ use colored::*;
 use semver::Version;
 use std::collections::HashMap;
 use std::fs;
+use std::ops;
 use std::str::FromStr;
 use toml::Value;
 
@@ -11,7 +12,7 @@ use super::error::Error;
 /// this is not a deserialisable struct, so every map can live at top level
 pub struct MapPlaces {
     p_version: Version,
-    p_maps: HashMap<String, Map>,
+    p_maps: HashMap<String, MapInfo>,
 }
 
 impl MapPlaces {
@@ -38,19 +39,54 @@ impl MapPlaces {
 
         if version < Version::new(99, 99, 99) {
             // check in reserve order for version
-            maps = Map::from_conf(&content, verbose)?;
+            maps = MapInfo::from_conf(&content, verbose)?;
         }
         Ok(MapPlaces {
             p_version: version,
             p_maps: maps,
         })
     }
+
+    /// return vector of possible map names
+    pub fn available_maps(&self) -> Vec<String> {
+        let mut vec = Vec::new();
+
+        for (k, _) in &self.p_maps {
+            vec.push(k.clone());
+        }
+
+        vec // return map names
+    }
+
+    /// returns the pointer to a specific map
+    fn get_map(&self, name: String) -> Result<&MapInfo, Error> {    //TODO: add Result type
+        match self.p_maps.get(&name) {
+            Some(data) => Ok(data),
+            None => Err(Error::new_field_not_exists(name))
+        }
+    }
+
+    pub fn get(&self, name: String) -> Result<String, Error> {
+        Ok("Test".to_string())
+    }
+}
+
+/// Map holds a map ready to send to a client
+pub struct Map {
+    p_name: String,
+}
+
+impl Map {
+    /// returns the name of the map
+    pub fn name(&self) -> String {
+        self.p_name.clone() // returns a clone
+    }
 }
 
 /// this holds a single map with all of the coresponding informations
 ///
 /// This function willnot preload the map, but loads it when used (random??)
-struct Map {
+struct MapInfo {
     /// name of the given map
     p_name: String,
 
@@ -67,7 +103,7 @@ struct Map {
     p_verbose: bool,
 }
 
-impl Map {
+impl MapInfo {
     /// creates a new instance of the Map
     /// This function only returns the struct with the given data filled in, so there is no logic involved
     pub fn new(
@@ -77,7 +113,7 @@ impl Map {
         format: MapFormat,
         verbose: bool,
     ) -> Self {
-        Map {
+        MapInfo {
             p_name: name,
             p_file: file,
             p_version: version,
@@ -199,6 +235,11 @@ impl Map {
     /// returns the verbose state of the Map
     pub fn is_verbose(&self) -> bool {
         self.p_verbose
+    }
+
+    /// get_map returns a finish map object ready to be send
+    pub fn get_map(&self) -> Result<Map, Error> {
+        Err(Error::new_field_not_exists("code".to_string()))
     }
 }
 

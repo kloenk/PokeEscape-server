@@ -66,13 +66,6 @@ impl Config {
             }
         };
 
-        println!(
-            "listening on {}:{}",
-            self.host.green(),
-            self.port.to_string().green()
-        );
-        let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap(); //FIXME: !!!
-
         let mut thread_pool = threads::ThreadPool::new(self.threads).unwrap_or_else(|err| {
             println!("Error creating threadPool: {}", err.red());
             process::exit(-2);
@@ -86,6 +79,13 @@ impl Config {
                 thread_pool.get_threads().to_string().green()
             );
         }
+
+        println!(
+            "listening on {}:{}",
+            self.host.green(),
+            self.port.to_string().green()
+        );
+        let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap(); //FIXME: !!!
 
         for stream in listener.incoming() {
             let stream = stream.unwrap(); // FIXME: unwrap
