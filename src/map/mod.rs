@@ -284,7 +284,7 @@ impl MapInfo {
 
         // read json
         let file = fs::read_to_string(&self.p_file)?;
-        let content: Value = serde_json::from_str(file.as_str()).unwrap();  //FIXME: unwrap
+        let content: Value = serde_json::from_str(file.as_str())?;
 
 
         // get name

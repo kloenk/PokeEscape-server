@@ -101,6 +101,13 @@ impl std::convert::From<toml::de::Error> for Error {
     }
 }
 
+impl std::convert::From<serde_json::error::Error> for Error {
+    fn from(err: serde_json::error::Error) -> Self {
+        Error {
+            my_kind: ErrorKind::Other(err.to_string()),
+        }
+    }
+}
 impl std::convert::From<semver::SemVerError> for Error {
     fn from(err: semver::SemVerError) -> Self {
         let error = match err {
