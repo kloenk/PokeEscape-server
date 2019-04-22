@@ -59,15 +59,18 @@ impl MapPlaces {
     }
 
     /// returns the pointer to a specific map
-    fn get_map(&self, name: String) -> Result<&MapInfo, Error> {    //TODO: add Result type
-        match self.p_maps.get(&name) {
-            Some(data) => Ok(data),
+    fn get_map(&self, name: String) -> Result<Map, Error> {    //TODO: add Result type
+        match self.p_maps.get(&name) {  // FIXME foo
+            Some(data) => data.load_map(),
             None => Err(Error::new_field_not_exists(name))
         }
     }
 
-    pub fn get(&self, name: String) -> Result<String, Error> {
-        Ok("Test".to_string())
+    pub fn get(&self, name: &str) -> Result<Map, Error> {
+        match self.p_maps.get(name) {   // FIXME: version foo for random feature
+            Some(data) => data.load_map(),
+            None => Err(Error::new_field_not_exists(name.to_string()))
+        }
     }
 }
 
@@ -271,6 +274,106 @@ impl MapInfo {
     /// get_map returns a finish map object ready to be send
     pub fn get_map(&self) -> Result<Map, Error> {
         Err(Error::new_field_not_exists("code".to_string()))
+    }
+
+    /// load and return a map
+    pub fn load_map(&self) -> Result<Map, Error> {
+        if self.p_verbose {
+            println!("Loading {} from {}", self.p_name.green(), self.p_file.blue());
+        }
+
+        // read json
+        let file = fs::read_to_string(&self.p_file)?;
+        let content: Value = serde_json::from_str(file.as_str()).unwrap();  //FIXME: unwrap
+
+
+        // get name
+        let name: String = match content.get("name") {
+            Some(name) => { match name.as_str() {
+                Some(name) => name.to_string(),
+                None => return Err(Error::new_field_not_exists("name".to_string())),
+            }},
+            None => return Err(Error::new_field_not_exists("name".to_string())),
+        };
+        if name != self.p_name {    // check name
+            eprintln!("Map name {} differs from name {}", name, self.p_name);
+        }
+
+        // get feature list
+        let mut features: Option<Vec<String>> = None;
+        let f = content.get("features");
+        if f.is_some() {
+            let f = f.unwrap();
+            if f.is_array() {
+                let mut fe = Vec::new();
+                for v in f.as_array().unwrap() {
+                    if !v.is_str() {
+                        return Err(Error::new_field_not_exists("features is not string".to_string()))
+                    }
+                    fe.push(v.as_str().unwrap().to_string());
+                }
+                features = Some(fe);    // attach to fe
+            } else if f.is_str() {
+                features = Some(vec!(f.as_str().unwrap().to_string()));
+            }
+        }
+        drop(f);    // remove f
+        features = match features { // check if it only says none
+            Some(f) => {
+                let mut ret: Option<Vec<String>> = Some(f.clone());
+                if f.len() == 1 {
+                    if f[0] == "none" {
+                        ret = None;
+                    }
+                }
+                ret
+            },
+            None => None,
+        };
+
+
+        // load map
+        let mut map: Vec<[u8; 20]> = Vec::new();
+        let j_map = match content.get("map") {
+            Some(j) => j,
+            None => return Err(Error::new_field_not_exists("map".to_string())),
+        };
+        let j_map = match j_map.as_array() {
+            Some(j) => j,
+            None => return Err(Error::new_field_not_exists("map".to_string())),
+        };
+        for v in j_map {
+            let v = match v.as_array() {
+                Some(j) => j,
+                None => return Err(Error::new_field_not_exists("map".to_string())),
+            };
+            if v.len() < 20 {
+                eprintln!("map smaller than 20 collums");
+            } else if v.len() > 20 {
+                eprintln!("map to big");
+                return Err(Error::new_field_not_exists("map".to_string()));
+            }
+            let mut i = 0;  // index for row
+            let mut row: [u8; 20] = [0; 20];
+            for b in v {
+                let b = match b.as_integer() {
+                    Some(j) => j,
+                    None => return Err(Error::new_field_not_exists("map".to_string())),
+                };
+                row[i] = b as u8;
+                i += 1;
+            }
+            map.push(row);
+        }
+        drop(j_map);    // remove j_map
+
+        Ok(
+            Map{
+                p_name: name,
+                p_features: features,
+                p_map: map,
+            }
+        )
     }
 }
 
