@@ -72,6 +72,14 @@ impl MapPlaces {
             None => Err(Error::new_field_not_exists(name.to_string()))
         }
     }
+
+    /// returns the author of the map
+    pub fn get_author(&self, name: &str) -> Option<String> {
+        match self.p_maps.get(name) {
+            Some(m) => m.author(),
+            None => None,
+        }
+    }
 }
 
 /// Map holds a map ready to send to a client
@@ -131,7 +139,8 @@ struct MapInfo {
     /// format of the given map file
     p_format: MapFormat,
 
-    //TODO: add authors
+    /// author of the map
+    p_author: Option<Vec<String>>,
 
     /// set to true if the mapload should operate in verbose mode
     p_verbose: bool,
@@ -145,6 +154,7 @@ impl MapInfo {
         file: String,
         version: Version,
         format: MapFormat,
+        author: Option<Vec<String>>,
         verbose: bool,
     ) -> Self {
         MapInfo {
@@ -152,6 +162,7 @@ impl MapInfo {
             p_file: file,
             p_version: version,
             p_format: format,
+            p_author: author,
             p_verbose: verbose,
         }
     }
@@ -239,6 +250,41 @@ impl MapInfo {
             None => "JSON",
         };
 
+        let author: Option<Vec<String>> = match toml.get("author") {
+            Some(a) => {
+                let mut nan: bool = false;
+                let mut ret = Vec::new();
+                if !a.is_array() {
+                    let b = match a.as_str() {
+                        Some(c) => c.to_string(),
+                        None => {
+                            nan = true;
+                            "NaN".to_string()
+                        },
+                    };
+                    ret.push(b);
+                } else if a.is_array() {
+                    for v in a.as_array().unwrap() {
+                        let b = match v.as_str() {
+                            Some(s) => s.to_string(),
+                            None => {
+                                nan = true;
+                                "NaN".to_string()
+                            },
+                        };
+                        ret.push(b);
+                    }
+                } else {
+                    nan = true
+                }
+                match nan {
+                    true => None,
+                    false => Some(ret)
+                }
+            },
+            None => None,
+        };
+
         let format: MapFormat;
 
         if format_str.to_lowercase() == "json" {
@@ -247,7 +293,13 @@ impl MapInfo {
             return Err(Error::new(super::error::ErrorKind::FormatNotSupported));
         }
 
-        Ok(Self::new(name, file, version, format, verbose))
+        Ok(Self::new(
+            name,
+            file,
+            version,
+            format,
+            author,
+            verbose))
     }
 
     /// returns the name of the Map it hold information about
@@ -269,6 +321,19 @@ impl MapInfo {
     /// returns the verbose state of the Map
     pub fn is_verbose(&self) -> bool {
         self.p_verbose
+    }
+
+    /// returns the author of the map
+    pub fn author(&self) -> Option<String> {
+        let mut ret = String::new();
+        let maps = match &self.p_author {
+            Some(m) => m,
+            None => return None,
+        };
+        for v in maps {
+            ret += v;
+        }
+        Some(ret)
     }
 
     /// get_map returns a finish map object ready to be send
