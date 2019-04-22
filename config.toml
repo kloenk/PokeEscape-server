@@ -1,8 +1,15 @@
 [Maps]
 version = "0.1.0"
-maps = ["Hello World", "Does not Exists"]
+maps = ["Hello World", "Diamond Dust", "Does not Exists"]
 
 ["Hello World"]
 version = "0.1.0"
 path = "./maps/Hello_World.map"
+author = ["Finn Behrens <finn@kloenk.de>"]
+format = "json"
+
+["Diamond Dust"]
+version = "0.1.0"
+path = "./maps/Sailing_Island.map"
+author = ["Finn Behrens <finn@kloenk.de>"]
 format = "json"
