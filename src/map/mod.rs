@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::str::FromStr;
 use toml::Value;
+use serde_derive::Serialize;
 
 use super::error::Error;
 
@@ -92,6 +93,7 @@ impl MapPlaces {
 }
 
 /// Map holds a map ready to send to a client
+#[derive(Serialize)]
 pub struct Map {
     p_name: String,
     p_features: Option<Vec<String>>,
