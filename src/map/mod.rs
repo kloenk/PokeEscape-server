@@ -134,6 +134,18 @@ impl Map {
     }
 }
 
+/// print trait
+impl std::fmt::Display for Map {
+    /// standart formater for print! macro
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let json = match serde_json::to_string(self) {
+            Ok(json) => json,
+            Err(err) => format!("{{\"status\": 100, \"err\": \"{}\"}}", err.to_string()), 
+        };
+        write!(f, "{}", json)
+    }
+}
+
 /// this holds a single map with all of the coresponding informations
 ///
 /// This function willnot preload the map, but loads it when used (random??)
