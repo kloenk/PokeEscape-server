@@ -4,7 +4,7 @@ use std::thread;
 
 /// threads is the lib for the ThreadPool struct
 
-/// reexport Result type
+#[doc(inline)]
 pub use super::error::Result;
 
 use super::error::{Error, ErrorKind};

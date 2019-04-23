@@ -5,7 +5,7 @@ use std::net::TcpStream;
 
 use super::error::Error;
 
-/// reexport Result type
+#[doc(inline)]
 pub use super::error::Result;
 
 /// handling code for the http server

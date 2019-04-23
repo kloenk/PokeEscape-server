@@ -8,7 +8,7 @@ use serde_derive::Serialize;
 
 use super::error::Error;
 
-/// reexport error Result type
+#[doc(inline)]
 pub use super::error::Result;
 
 /// defines the width of the map
