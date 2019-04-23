@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["ErrorKind",""]],"struct":[["Error",""]]});
+initSidebarItems({"enum":[["ErrorKind",""]],"struct":[["Error",""]],"type":[["Result","public type for Result predifined with `error::Error` as Error type"]]});

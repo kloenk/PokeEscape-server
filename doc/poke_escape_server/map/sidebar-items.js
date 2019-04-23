@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["WIDTH","defines the width of the map"]],"struct":[["Map","Map holds a map ready to send to a client"],["MapPlaces","struct holding all informations of the toml file this is not a deserialisable struct, so every map can live at top level"]]});
