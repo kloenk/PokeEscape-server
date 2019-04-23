@@ -8,6 +8,8 @@ use serde_derive::Serialize;
 
 use super::error::Error;
 
+/// reexport error Result type
+pub use super::error::Result;
 
 /// defines the width of the map
 pub const WIDTH: usize = 20;
@@ -22,7 +24,7 @@ pub struct MapPlaces {
 
 impl MapPlaces {
     /// parses toml file and creates a new MapPlaces instance
-    pub fn new(file: &str, verbose: bool) -> Result<Self, Error> {
+    pub fn new(file: &str, verbose: bool) -> Result<Self> {
         if verbose {
             println!("Loading {} from {}", "Maps".green(), file.blue());
         }
@@ -64,14 +66,14 @@ impl MapPlaces {
     }
 
     /// returns the pointer to a specific map
-    fn get_map(&self, name: String) -> Result<Map, Error> {    //TODO: add Result type
+    fn get_map(&self, name: String) -> Result<Map> {
         match self.p_maps.get(&name) {  // FIXME foo
             Some(data) => data.load_map(),
             None => Err(Error::new_field_not_exists(name))
         }
     }
 
-    pub fn get(&self, name: &str) -> Result<Map, Error> {
+    pub fn get(&self, name: &str) -> Result<Map> {
         match self.p_maps.get(name) {   // FIXME: version foo for random feature
             Some(data) => data.load_map(),
             None => Err(Error::new_field_not_exists(name.to_string()))
@@ -190,7 +192,7 @@ impl MapInfo {
         }
     }
 
-    pub fn from_conf(toml: &toml::Value, verbose: bool) -> Result<HashMap<String, Self>, Error> {
+    pub fn from_conf(toml: &toml::Value, verbose: bool) -> Result<HashMap<String, Self>> {
         if toml["Maps"].get("maps") == None {
             return Err(Error::new_field_not_exists("Maps.maps".to_string()));
         }
@@ -246,7 +248,7 @@ impl MapInfo {
         Ok(maps)
     }
 
-    fn from_conf_one(toml: &toml::Value, name: String, verbose: bool) -> Result<Self, Error> {
+    fn from_conf_one(toml: &toml::Value, name: String, verbose: bool) -> Result<Self> {
         let file = match toml.get("path") {
             Some(path) => path,
             None => return Err(Error::new_field_not_exists(format!("{}.path", name))),
@@ -360,12 +362,12 @@ impl MapInfo {
     }
 
     /// get_map returns a finish map object ready to be send
-    pub fn get_map(&self) -> Result<Map, Error> {
+    pub fn get_map(&self) -> Result<Map> {
         Err(Error::new_field_not_exists("code".to_string()))
     }
 
     /// load and return a map
-    pub fn load_map(&self) -> Result<Map, Error> {
+    pub fn load_map(&self) -> Result<Map> {
         if self.p_verbose {
             println!("Loading {} from {}", self.p_name.green(), self.p_file.blue());
         }

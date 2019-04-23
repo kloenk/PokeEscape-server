@@ -64,10 +64,10 @@ impl Config {
                 eprintln!("Error loading maps: {}", err.to_string().red());
                 std::process::exit(20);
             }
-        };
+        };        
 
         let mut thread_pool = threads::ThreadPool::new(self.threads).unwrap_or_else(|err| {
-            println!("Error creating threadPool: {}", err.red());
+            println!("Error creating threadPool: {}", err.to_string().red());
             process::exit(-2);
         });
 

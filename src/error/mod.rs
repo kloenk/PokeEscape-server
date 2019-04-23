@@ -5,6 +5,8 @@ use std::io;
 #[cfg(test)]
 mod test;
 
+pub type Result<T> = std::result::Result<T, Error>;
+
 pub struct Error {
     my_kind: ErrorKind,
 }
@@ -59,7 +61,7 @@ impl Error {
 impl fmt::Display for Error {
     /// standart formater for print! macro
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Error of Kind {}", self.my_kind.to_string())
+        write!(f, "Error of Kind {}", self.my_kind.to_string()) // TODO: create a more readable output
     }
 }
 
@@ -194,6 +196,13 @@ pub enum ErrorKind {
     /// Version Not Parsable error, used if the version cannot be parsed
     VersionNotParsable(String),
 
+    /// Pool To Small is returned when the Threapool is to small to be created
+    PoolToSmall,
+
+    /// Pool Send Error is a send error in a channel for the ThreadPool
+    /// contains true if it wasn't a terminate instruction
+    PoolSendError(bool),
+
     /// Other error, used for string to error conversion
     Other(String),
 
@@ -226,6 +235,13 @@ impl ErrorKind {
             ErrorKind::FieldNotExists(data) => format!("FieldNotExists({})", data),
             ErrorKind::NoVersionSupplied => String::from("NoVersionSupplied"),
             ErrorKind::VersionNotParsable(data) => format!("VersionNotParsable({})", data),
+            ErrorKind::PoolToSmall => String::from("PoolToSmall"),
+            ErrorKind::PoolSendError(t) => {
+                match t {
+                    true => String::from("PoolSendError(Job)"),
+                    false => String::from("PoolSendError(Terminate)"),
+                }
+            }
             ErrorKind::Other(data) => format!("Other({})", data),
             ErrorKind::Unknown(data) => format!("Unknown({})", data),
         }

@@ -240,6 +240,21 @@ mod error_kind_error_string {
     }
 
     #[test]
+    fn pool_to_small() {
+        let kind = ErrorKind::PoolToSmall;
+        assert_eq!(kind.error_string(), String::from("PoolToSmall"));
+    }
+
+    #[test]
+    fn pool_send_error() {
+        let kind = ErrorKind::PoolSendError(true);
+        assert_eq!(kind.error_string(), String::from("PoolSendError(Job)"));
+
+        let kind = ErrorKind::PoolSendError(false);
+        assert_eq!(kind.error_string(), String::from("PoolSendError(Terminate)"));
+    }
+
+    #[test]
     fn other() {
         let kind = ErrorKind::Other(String::from("test"));
         assert_eq!(kind.error_string(), String::from("Other(test)"));
