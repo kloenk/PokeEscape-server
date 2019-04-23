@@ -235,8 +235,8 @@ mod error_kind_error_string {
 
     #[test]
     fn version_not_parsable() {
-        let kind = ErrorKind::VersionNotParsable;
-        assert_eq!(kind.error_string(), String::from("VersionNotParsable"));
+        let kind = ErrorKind::VersionNotParsable("test".to_string());
+        assert_eq!(kind.error_string(), String::from("VersionNotParsable(test)"));
     }
 
     #[test]
