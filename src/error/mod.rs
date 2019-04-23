@@ -5,6 +5,7 @@ use std::io;
 #[cfg(test)]
 mod test;
 
+/// public type for Result predifined with `error::Error` as Error type
 pub type Result<T> = std::result::Result<T, Error>;
 
 pub struct Error {
