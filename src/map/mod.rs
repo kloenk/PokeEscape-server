@@ -2,7 +2,6 @@ use colored::*;
 use semver::Version;
 use std::collections::HashMap;
 use std::fs;
-use std::ops;
 use std::str::FromStr;
 use toml::Value;
 
@@ -85,13 +84,18 @@ impl MapPlaces {
             None => None,
         }
     }
+
+    /// returns the version of the map
+    pub fn version(&self) -> &Version {
+        &self.p_version
+    }
 }
 
 /// Map holds a map ready to send to a client
 pub struct Map {
     p_name: String,
     p_features: Option<Vec<String>>,
-    pub p_map: Vec<[u8; WIDTH]>,
+    p_map: Vec<[u8; WIDTH]>,
 }
 
 impl Map {
