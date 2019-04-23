@@ -5,18 +5,32 @@ use std::io;
 #[cfg(test)]
 mod test;
 
+/// public type for Result predifined with `error::Error` as Error type
+pub type Result<T> = std::result::Result<T, Error>;
+
 pub struct Error {
     my_kind: ErrorKind,
 }
 
 impl Error {
     /// creates a new Error
-    pub fn new(kind: ErrorKind) -> Error {
+    pub fn new(kind: ErrorKind) -> Self {
         Error { my_kind: kind }
     }
 
+    /// returns the internal type of the error
     pub fn kind(&self) -> ErrorKind {
         self.my_kind.clone()
+    }
+
+    /// creates a new error of the type NoVersionSupplied
+    pub fn new_no_version_supplied() -> Self {
+        Self::new(ErrorKind::NoVersionSupplied)
+    }
+
+    /// creates a new error of the Kind FieldNotExists
+    pub fn new_field_not_exists(field: String) -> Self {
+        Self::new(ErrorKind::FieldNotExists(field))
     }
 
     fn io_to_kind(kind: io::ErrorKind) -> ErrorKind {
@@ -48,7 +62,7 @@ impl Error {
 impl fmt::Display for Error {
     /// standart formater for print! macro
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Error of Kind {}", self.my_kind.to_string())
+        write!(f, "Error of Kind {}", self.my_kind.to_string()) // TODO: create a more readable output
     }
 }
 
@@ -78,6 +92,32 @@ impl std::convert::From<std::string::String> for Error {
     fn from(string: String) -> Self {
         Error {
             my_kind: ErrorKind::Other(string),
+        }
+    }
+}
+
+impl std::convert::From<toml::de::Error> for Error {
+    fn from(err: toml::de::Error) -> Self {
+        Error {
+            my_kind: ErrorKind::Other(err.to_string()), // FIXME: create own error type
+        }
+    }
+}
+
+impl std::convert::From<serde_json::error::Error> for Error {
+    fn from(err: serde_json::error::Error) -> Self {
+        Error {
+            my_kind: ErrorKind::Other(err.to_string()),
+        }
+    }
+}
+impl std::convert::From<semver::SemVerError> for Error {
+    fn from(err: semver::SemVerError) -> Self {
+        let error = match err {
+            semver::SemVerError::ParseError(error) => error,
+        };
+        Error {
+            my_kind: ErrorKind::VersionNotParsable(error),
         }
     }
 }
@@ -144,6 +184,26 @@ pub enum ErrorKind {
     /// IO Unexpected EOF error, transformed from `std::io::ErrorKind::UnexpectedEof
     IoUnexpectedEof,
 
+    /// Format Not Supported, raised when the format defined in config.toml is not supported
+    FormatNotSupported,
+
+    /// Field Not Exists, raised when a important field is missing in config
+    /// also raised if file is of the wrong type
+    FieldNotExists(String),
+
+    /// No Version Supplied error, used if the version of the client is none
+    NoVersionSupplied,
+
+    /// Version Not Parsable error, used if the version cannot be parsed
+    VersionNotParsable(String),
+
+    /// Pool To Small is returned when the Threapool is to small to be created
+    PoolToSmall,
+
+    /// Pool Send Error is a send error in a channel for the ThreadPool
+    /// contains true if it wasn't a terminate instruction
+    PoolSendError(bool),
+
     /// Other error, used for string to error conversion
     Other(String),
 
@@ -172,6 +232,17 @@ impl ErrorKind {
             ErrorKind::IoInterrupted => String::from("IoInterrupted"),
             ErrorKind::IoOther => String::from("IoOther"),
             ErrorKind::IoUnexpectedEof => String::from("IoUnexpectedEof"),
+            ErrorKind::FormatNotSupported => String::from("FormatNotSupported"),
+            ErrorKind::FieldNotExists(data) => format!("FieldNotExists({})", data),
+            ErrorKind::NoVersionSupplied => String::from("NoVersionSupplied"),
+            ErrorKind::VersionNotParsable(data) => format!("VersionNotParsable({})", data),
+            ErrorKind::PoolToSmall => String::from("PoolToSmall"),
+            ErrorKind::PoolSendError(t) => {
+                match t {
+                    true => String::from("PoolSendError(Job)"),
+                    false => String::from("PoolSendError(Terminate)"),
+                }
+            }
             ErrorKind::Other(data) => format!("Other({})", data),
             ErrorKind::Unknown(data) => format!("Unknown({})", data),
         }

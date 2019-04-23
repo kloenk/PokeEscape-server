@@ -4,6 +4,11 @@ use std::thread;
 
 /// threads is the lib for the ThreadPool struct
 
+/// reexport Result type
+pub use super::error::Result;
+
+use super::error::{Error, ErrorKind};
+
 /// struct used a type for the ThreadPool
 pub struct ThreadPool {
     size: usize,
@@ -34,9 +39,9 @@ impl ThreadPool {
     /// use poke_escape_server::threads::ThreadPool;
     /// let pool = ThreadPool::new(0).unwrap();     // unwrap panics
     /// ```
-    pub fn new(size: usize) -> Result<ThreadPool, String> {
+    pub fn new(size: usize) -> Result<ThreadPool> {
         if size == 0 {
-            return Err(String::from("Size cannot be 0"));
+            return Err(Error::new(ErrorKind::PoolToSmall));
         }
 
         let (sender, receiver) = mpsc::channel();
@@ -123,17 +128,18 @@ impl ThreadPool {
     }
 
     /// execute send a function into a thread to be executed there
-    pub fn execute<'a, F>(&self, f: F) -> Result<(), String>
+    pub fn execute<'a, F>(&self, f: F) -> Result<()>
     where
         F: FnOnce() + Send + 'static,
     {
         let job = Box::new(f);
 
-        match self.sender.send(Message::NewJob(job)) {
+        /*match self.sender.send(Message::NewJob(job)) {
             //FIXME: unwrap
             Ok(()) => return Ok(()),
             Err(err) => return Err(err.to_string()),
-        };
+        };*/
+        Ok(self.sender.send(Message::NewJob(job))?)
     }
 }
 
@@ -164,6 +170,18 @@ impl Drop for ThreadPool {
         }
     }
 }
+
+
+/// implement function to convert sendError to Error
+impl std::convert::From<std::sync::mpsc::SendError<super::threads::Message>> for Error {
+    fn from(err: std::sync::mpsc::SendError<super::threads::Message>) -> Self {
+        match err.0 {
+            Message::NewJob(_) => Error::new(ErrorKind::PoolSendError(true)),
+            Message::Terminate => Error::new(ErrorKind::PoolSendError(false)),
+        }
+    }
+}
+
 
 /// enum to hold either a Job or a Terminate signal for the worker thread
 enum Message {

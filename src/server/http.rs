@@ -3,7 +3,8 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::net::TcpStream;
 
-use super::super::error::Error;
+/// reexport Result type
+pub use super::super::error::Result;
 
 /// This function is called when the client protocol seems to be HTTP
 ///
@@ -13,7 +14,7 @@ use super::super::error::Error;
 pub fn handle_client(
     stream: &mut TcpStream,
     _reader: BufReader<TcpStream>,
-) -> Result<&mut TcpStream, Error> {
+) -> Result<&mut TcpStream> {
     println!("Client {} requestd {}", stream.peer_addr()?, "http".blue());
     let html_content = r#"
 <!DOCTYPE html>

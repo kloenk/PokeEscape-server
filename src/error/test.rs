@@ -222,6 +222,39 @@ mod error_kind_error_string {
     }
 
     #[test]
+    fn format_not_supported() {
+        let kind = ErrorKind::FormatNotSupported;
+        assert_eq!(kind.error_string(), String::from("FormatNotSupported"));
+    }
+
+    #[test]
+    fn no_version_supplied() {
+        let kind = ErrorKind::NoVersionSupplied;
+        assert_eq!(kind.error_string(), String::from("NoVersionSupplied"));
+    }
+
+    #[test]
+    fn version_not_parsable() {
+        let kind = ErrorKind::VersionNotParsable("test".to_string());
+        assert_eq!(kind.error_string(), String::from("VersionNotParsable(test)"));
+    }
+
+    #[test]
+    fn pool_to_small() {
+        let kind = ErrorKind::PoolToSmall;
+        assert_eq!(kind.error_string(), String::from("PoolToSmall"));
+    }
+
+    #[test]
+    fn pool_send_error() {
+        let kind = ErrorKind::PoolSendError(true);
+        assert_eq!(kind.error_string(), String::from("PoolSendError(Job)"));
+
+        let kind = ErrorKind::PoolSendError(false);
+        assert_eq!(kind.error_string(), String::from("PoolSendError(Terminate)"));
+    }
+
+    #[test]
     fn other() {
         let kind = ErrorKind::Other(String::from("test"));
         assert_eq!(kind.error_string(), String::from("Other(test)"));
@@ -233,3 +266,5 @@ mod error_kind_error_string {
         assert_eq!(kind.error_string(), String::from("Unknown(test)"));
     }
 }
+
+// FIXME: tests

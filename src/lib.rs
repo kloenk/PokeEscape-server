@@ -11,6 +11,9 @@ pub mod threads;
 /// module that holds error structures for use in `Result<T, error::Error>`
 pub mod error;
 
+/// module containing map loader
+pub mod map;
+
 /// Config is a interface designed to use with structopt on the cli, but also to run the code
 ///
 #[derive(StructOpt, Debug)]
@@ -31,6 +34,10 @@ pub struct Config {
     /// Set number of running threads
     #[structopt(short = "t", long = "threads", default_value = "8")]
     pub threads: usize,
+
+    /// config file for maps (toml)
+    #[structopt(short = "c", long = "config", default_value = "./config.toml")]
+    pub config: String,
 }
 
 impl Config {
@@ -50,15 +57,17 @@ impl Config {
             println!("Running in {} mode", "Verbose".red());
         }
 
-        println!(
-            "listening on {}:{}",
-            self.host.green(),
-            self.port.to_string().green()
-        );
-        let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap(); //FIXME: !!!
+        // load maps
+        let maps = match map::MapPlaces::new(&self.config, self.verbose) {
+            Ok(maps) => maps,
+            Err(err) => {
+                eprintln!("Error loading maps: {}", err.to_string().red());
+                std::process::exit(20);
+            }
+        };        
 
         let mut thread_pool = threads::ThreadPool::new(self.threads).unwrap_or_else(|err| {
-            println!("Error creating threadPool: {}", err.red());
+            println!("Error creating threadPool: {}", err.to_string().red());
             process::exit(-2);
         });
 
@@ -70,6 +79,13 @@ impl Config {
                 thread_pool.get_threads().to_string().green()
             );
         }
+
+        println!(
+            "listening on {}:{}",
+            self.host.green(),
+            self.port.to_string().green()
+        );
+        let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap(); //FIXME: !!!
 
         for stream in listener.incoming() {
             let stream = stream.unwrap(); // FIXME: unwrap

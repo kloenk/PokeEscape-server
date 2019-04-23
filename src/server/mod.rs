@@ -5,12 +5,15 @@ use std::net::TcpStream;
 
 use super::error::Error;
 
+/// reexport Result type
+pub use super::error::Result;
+
 /// handling code for the http server
 pub mod http;
 
 /// This function negotiates the protocoll to use between the client and the Server
 /// it calles the function of the protocoll, uses &TcpStream and a buffer as arguments
-pub fn negotiate(mut conf: Job) -> Result<(), Error> {
+pub fn negotiate(mut conf: Job) -> Result<()> { // FIXME: return error
     let mut reader = BufReader::new(conf.stream.try_clone()?);
     let mut line = String::new();
     reader.read_line(&mut line)?;
@@ -34,25 +37,25 @@ pub fn negotiate(mut conf: Job) -> Result<(), Error> {
 }
 
 /// starts the connection to the client
-pub fn handle_pokemon_client(mut stream: TcpStream) -> Result<TcpStream, ()> {
+pub fn handle_pokemon_client(mut stream: TcpStream) -> Result<TcpStream> {
     let mut reader = BufReader::new(stream.try_clone().unwrap()); //FIXME: unwrap
     loop {
         let mut line = String::new();
         match reader.read_line(&mut line) {
-            Err(_err) => return Err(()), //FIXME: return error?
+            Err(_err) => return Err(Error::new_field_not_exists("fix error handling".to_string())), //FIXME: return error?
             Ok(_) => (),                 // would return usize with number read bytes
         };
 
-        stream.write(line.as_bytes()).unwrap(); //FIXME: unwrap
-        stream.flush().unwrap(); //FIXME: unwrap
+        stream.write(line.as_bytes())?;
+        stream.flush()?;
 
         if line.to_lowercase().starts_with("quit") {
             // send quit
-            stream.write(b"Bye").unwrap(); //FIXME: unwrap
+            stream.write(b"Bye")?;
             break; // exit loop
         }
     }
-    stream.flush().unwrap(); //FIXME: unwrap
+    stream.flush()?;
     Ok(stream)
 }
 
