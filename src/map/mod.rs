@@ -8,6 +8,11 @@ use toml::Value;
 
 use super::error::Error;
 
+
+/// defines the width of the map
+pub const WIDTH: usize = 20;
+
+
 /// struct holding all informations of the toml file
 /// this is not a deserialisable struct, so every map can live at top level
 pub struct MapPlaces {
@@ -86,7 +91,7 @@ impl MapPlaces {
 pub struct Map {
     p_name: String,
     p_features: Option<Vec<String>>,
-    p_map: Vec<[u8; 20]>,   // 20 collums - dynamic rows
+    pub p_map: Vec<[u8; WIDTH]>,
 }
 
 impl Map {
@@ -398,7 +403,7 @@ impl MapInfo {
 
 
         // load map
-        let mut map: Vec<[u8; 20]> = Vec::new();
+        let mut map: Vec<[u8; WIDTH]> = Vec::new();
         let j_map = match content.get("map") {
             Some(j) => j,
             None => return Err(Error::new_field_not_exists("map".to_string())),
@@ -412,14 +417,14 @@ impl MapInfo {
                 Some(j) => j,
                 None => return Err(Error::new_field_not_exists("map".to_string())),
             };
-            if v.len() < 20 {
-                eprintln!("map smaller than 20 collums");
-            } else if v.len() > 20 {
+            if v.len() < WIDTH {
+                eprintln!("map smaller than {} collums", WIDTH);
+            } else if v.len() > WIDTH {
                 eprintln!("map to big");
-                return Err(Error::new_field_not_exists("map".to_string()));
+                return Err(Error::new_field_not_exists("map".to_string())); // FIXME: crop if to big
             }
             let mut i = 0;  // index for row
-            let mut row: [u8; 20] = [0; 20];
+            let mut row: [u8; WIDTH] = [0; WIDTH];
             for b in v {
                 let b = match b.as_integer() {
                     Some(j) => j,
