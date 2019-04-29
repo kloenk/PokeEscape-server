@@ -102,51 +102,73 @@
 <span id="102">102</span>
 <span id="103">103</span>
 <span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
 </pre><div class="example-wrap"><pre class="rust ">
+<span class="doccomment">//! # Poké Escape server</span>
+<span class="doccomment">//! PokéEscape is a game created in School as a group Project.</span>
+<span class="doccomment">//! This project contains the source code for the server, talking </span>
+<span class="doccomment">//! with the client written in GreenFoot (java)</span>
+<span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_docs</span>)]</span>
 <span class="kw">use</span> <span class="ident">colored</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">net</span>::<span class="ident">TcpListener</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">process</span>;
 <span class="kw">use</span> <span class="ident">structopt</span>::<span class="ident">StructOpt</span>;
 
+<span class="doccomment">/// general tcp module for talking with the client and negotiating the</span>
+<span class="doccomment">/// protocoll to use</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">server</span>;
 
-<span class="doccomment">/// threads contains the struct ThreadPool and all helper functions</span>
+<span class="doccomment">/// ThreadPool module</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">threads</span>;
 
-<span class="doccomment">/// module that holds error structures for use in `Result&lt;T, error::Error&gt;`</span>
+<span class="doccomment">/// module providing error Type/conversion</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">error</span>;
 
-<span class="doccomment">/// module containing map loader</span>
+<span class="doccomment">/// module providing map loader</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">map</span>;
 
-<span class="doccomment">/// Config is a interface designed to use with structopt on the cli, but also to run the code</span>
-<span class="doccomment">///</span>
+<span class="doccomment">/// struct deriving cli parsing. It also implements the run function, serving the main function</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">StructOpt</span>, <span class="ident">Debug</span>)]</span>
 <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">raw</span>(<span class="ident">setting</span> <span class="op">=</span> <span class="string">&quot;structopt::clap::AppSettings::ColoredHelp&quot;</span>))]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Config</span> {
-    <span class="doccomment">/// The port to run on</span>
+    <span class="doccomment">/// configures the port to listen on</span>
     <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">short</span> <span class="op">=</span> <span class="string">&quot;p&quot;</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;port&quot;</span>, <span class="ident">default_value</span> <span class="op">=</span> <span class="string">&quot;1996&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">port</span>: <span class="ident">u16</span>,
 
-    <span class="doccomment">/// address to listen on</span>
+    <span class="doccomment">/// configures the interface (ip) to listen on</span>
     <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">short</span> <span class="op">=</span> <span class="string">&quot;H&quot;</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;host&quot;</span>, <span class="ident">default_value</span> <span class="op">=</span> <span class="string">&quot;127.0.0.1&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">host</span>: <span class="ident">String</span>,
 
-    <span class="doccomment">/// Set application into verbose mode</span>
+    <span class="doccomment">/// enables verbose mode</span>
     <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">short</span> <span class="op">=</span> <span class="string">&quot;v&quot;</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;verbose&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">verbose</span>: <span class="ident">bool</span>,
 
-    <span class="doccomment">/// Set number of running threads</span>
+    <span class="doccomment">/// defines the number of thread in ThreadPool to use</span>
     <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">short</span> <span class="op">=</span> <span class="string">&quot;t&quot;</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;threads&quot;</span>, <span class="ident">default_value</span> <span class="op">=</span> <span class="string">&quot;8&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">threads</span>: <span class="ident">usize</span>,
 
-    <span class="doccomment">/// config file for maps (toml)</span>
+    <span class="doccomment">/// sets the config file (toml) to load the maps</span>
     <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">short</span> <span class="op">=</span> <span class="string">&quot;c&quot;</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;config&quot;</span>, <span class="ident">default_value</span> <span class="op">=</span> <span class="string">&quot;./config.toml&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">config</span>: <span class="ident">String</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Config</span> {
-    <span class="doccomment">/// Main function for the server</span>
+    <span class="doccomment">/// run function serving as the main function of the librarie.AsMut</span>
+    <span class="doccomment">/// </span>
+    <span class="doccomment">/// The function takes the config from itself, and serves the server as descriped</span>
+    <span class="doccomment">/// in this config.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="macro">println</span><span class="macro">!</span>(
             <span class="string">&quot;Starting {} server on port: {}&quot;</span>,
@@ -171,6 +193,7 @@
             }
         };        
 
+        <span class="comment">// create ThreadPool</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">thread_pool</span> <span class="op">=</span> <span class="ident">threads</span>::<span class="ident">ThreadPool</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">threads</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> {
             <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;Error creating threadPool: {}&quot;</span>, <span class="ident">err</span>.<span class="ident">to_string</span>().<span class="ident">red</span>());
             <span class="ident">process</span>::<span class="ident">exit</span>(<span class="op">-</span><span class="number">2</span>);
@@ -190,8 +213,10 @@
             <span class="self">self</span>.<span class="ident">host</span>.<span class="ident">green</span>(),
             <span class="self">self</span>.<span class="ident">port</span>.<span class="ident">to_string</span>().<span class="ident">green</span>()
         );
+        <span class="comment">// open socket</span>
         <span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">TcpListener</span>::<span class="ident">bind</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}:{}&quot;</span>, <span class="self">self</span>.<span class="ident">host</span>, <span class="self">self</span>.<span class="ident">port</span>)).<span class="ident">unwrap</span>(); <span class="comment">//FIXME: !!!</span>
 
+        <span class="comment">// handle incomming streams</span>
         <span class="kw">for</span> <span class="ident">stream</span> <span class="kw">in</span> <span class="ident">listener</span>.<span class="ident">incoming</span>() {
             <span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">stream</span>.<span class="ident">unwrap</span>(); <span class="comment">// FIXME: unwrap</span>
             <span class="kw">let</span> <span class="ident">conf</span> <span class="op">=</span> <span class="ident">server</span>::<span class="ident">Job</span> {
@@ -199,6 +224,7 @@
                 <span class="ident">verbose</span>: <span class="self">self</span>.<span class="ident">verbose</span>,
             };
 
+            <span class="comment">// execute Job in ThreadPool</span>
             <span class="ident">thread_pool</span>
                 .<span class="ident">execute</span>(<span class="kw">move</span> <span class="op">||</span> {
                     <span class="ident">server</span>::<span class="ident">negotiate</span>(<span class="ident">conf</span>).<span class="ident">unwrap</span>(); <span class="comment">//FIXME: unwrap</span>

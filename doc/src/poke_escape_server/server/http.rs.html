@@ -48,7 +48,7 @@
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">BufReader</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">net</span>::<span class="ident">TcpStream</span>;
 
-<span class="doccomment">/// reexport Result type</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">super</span>::<span class="kw">super</span>::<span class="ident">error</span>::<span class="prelude-ty">Result</span>;
 
 <span class="doccomment">/// This function is called when the client protocol seems to be HTTP</span>

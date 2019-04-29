@@ -472,6 +472,27 @@
 <span id="472">472</span>
 <span id="473">473</span>
 <span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">colored</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">semver</span>::<span class="ident">Version</span>;
@@ -483,28 +504,38 @@
 
 <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
 
-<span class="doccomment">/// reexport error Result type</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">error</span>::<span class="prelude-ty">Result</span>;
 
-<span class="doccomment">/// defines the width of the map</span>
+<span class="doccomment">/// defines the widht of the map </span>
+<span class="doccomment">/// </span>
+<span class="doccomment">/// creates warning and 0 an the right end if map in file is smaller,</span>
+<span class="doccomment">/// or crops the right side if map is bigger</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">WIDTH</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">20</span>;
 
 
 <span class="doccomment">/// struct holding all informations of the toml file</span>
-<span class="doccomment">/// this is not a deserialisable struct, so every map can live at top level</span>
+<span class="comment">// this is not a deserialisable struct, so every map can live at top level</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MapPlaces</span> {
+    <span class="doccomment">/// defines the version of the toml file</span>
     <span class="ident">p_version</span>: <span class="ident">Version</span>,
+
+    <span class="doccomment">/// stores available (set for loading) maps</span>
     <span class="ident">p_maps</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">MapInfo</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">MapPlaces</span> {
-    <span class="doccomment">/// parses toml file and creates a new MapPlaces instance</span>
+    <span class="doccomment">/// Loads toml file and deserialize it into `MapPlaces`</span>
+    <span class="doccomment">/// </span>
+    <span class="doccomment">/// # Arguments</span>
+    <span class="doccomment">/// - `file` -&gt; give the path of the toml file to load</span>
+    <span class="doccomment">/// - `verbose` -&gt; if set true shows status of loading</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">file</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">verbose</span>: <span class="ident">bool</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">verbose</span> {
             <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;Loading {} from {}&quot;</span>, <span class="string">&quot;Maps&quot;</span>.<span class="ident">green</span>(), <span class="ident">file</span>.<span class="ident">blue</span>());
         }
 
-        <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">fs</span>::<span class="ident">read_to_string</span>(<span class="ident">file</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">fs</span>::<span class="ident">read_to_string</span>(<span class="ident">file</span>)<span class="question-mark">?</span>;   <span class="comment">//FIXME: testing</span>
         <span class="kw">let</span> <span class="ident">content</span>: <span class="ident">Value</span> <span class="op">=</span> <span class="ident">toml</span>::<span class="ident">from_str</span>(<span class="ident">file</span>.<span class="ident">as_str</span>())<span class="question-mark">?</span>;
 
         <span class="kw">if</span> <span class="ident">content</span>.<span class="ident">get</span>(<span class="string">&quot;Maps&quot;</span>) <span class="op">==</span> <span class="prelude-val">None</span> {
@@ -529,7 +560,7 @@
         })
     }
 
-    <span class="doccomment">/// return vector of possible map names</span>
+    <span class="doccomment">/// list all maps described in this `MapPlaces`</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">available_maps</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
 
@@ -548,6 +579,10 @@
         }
     }
 
+    <span class="doccomment">/// return the Map with the given Name</span>
+    <span class="doccomment">/// </span>
+    <span class="doccomment">/// This function take a name as argument and returns the loaded Map</span>
+    <span class="doccomment">/// associated with the given name</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Map</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">p_maps</span>.<span class="ident">get</span>(<span class="ident">name</span>) {   <span class="comment">// FIXME: version foo for random feature</span>
             <span class="prelude-val">Some</span>(<span class="ident">data</span>) <span class="op">=&gt;</span> <span class="ident">data</span>.<span class="ident">load_map</span>(),
@@ -667,6 +702,7 @@
         }
     }
 
+    <span class="doccomment">/// Read toml value and returns a HashMap with the maps specified in the toml file</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_conf</span>(<span class="ident">toml</span>: <span class="kw-2">&amp;</span><span class="ident">toml</span>::<span class="ident">Value</span>, <span class="ident">verbose</span>: <span class="ident">bool</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="self">Self</span><span class="op">&gt;&gt;</span> {
         <span class="kw">if</span> <span class="ident">toml</span>[<span class="string">&quot;Maps&quot;</span>].<span class="ident">get</span>(<span class="string">&quot;maps&quot;</span>) <span class="op">==</span> <span class="prelude-val">None</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">new_field_not_exists</span>(<span class="string">&quot;Maps.maps&quot;</span>.<span class="ident">to_string</span>()));
@@ -723,6 +759,12 @@
         <span class="prelude-val">Ok</span>(<span class="ident">maps</span>)
     }
 
+    <span class="doccomment">/// reads one map from the toml and and returns the Map</span>
+    <span class="doccomment">/// </span>
+    <span class="doccomment">/// # Parameters</span>
+    <span class="doccomment">/// `toml` - The toml Value of the given Map</span>
+    <span class="doccomment">/// `name` - Name of the map to read</span>
+    <span class="doccomment">/// `verbose` - set to true for debug output </span>
     <span class="kw">fn</span> <span class="ident">from_conf_one</span>(<span class="ident">toml</span>: <span class="kw-2">&amp;</span><span class="ident">toml</span>::<span class="ident">Value</span>, <span class="ident">name</span>: <span class="ident">String</span>, <span class="ident">verbose</span>: <span class="ident">bool</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">toml</span>.<span class="ident">get</span>(<span class="string">&quot;path&quot;</span>) {
             <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=&gt;</span> <span class="ident">path</span>,
@@ -750,7 +792,7 @@
             <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="string">&quot;JSON&quot;</span>,
         };
 
-        <span class="kw">let</span> <span class="ident">author</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">toml</span>.<span class="ident">get</span>(<span class="string">&quot;author&quot;</span>) {
+        <span class="kw">let</span> <span class="ident">author</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">toml</span>.<span class="ident">get</span>(<span class="string">&quot;author&quot;</span>) {    <span class="comment">// read author from toml file</span>
             <span class="prelude-val">Some</span>(<span class="ident">a</span>) <span class="op">=&gt;</span> {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nan</span>: <span class="ident">bool</span> <span class="op">=</span> <span class="bool-val">false</span>;
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();

@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["ThreadPool","struct used a type for the ThreadPool"]]});
+initSidebarItems({"enum":[["Message","enum to hold either a Job or a Terminate signal for the worker thread"]],"struct":[["ThreadPool","struct used a type for the ThreadPool"],["Worker",""]],"trait":[["FnBox","trait to be used as type for the Job"]],"type":[["Job","Type for the Job to send to a worker"],["Result","public type for Result predifined with `error::Error` as Error type"]]});

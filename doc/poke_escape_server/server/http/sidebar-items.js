@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["handle_client","This function is called when the client protocol seems to be HTTP"]]});
+initSidebarItems({"fn":[["handle_client","This function is called when the client protocol seems to be HTTP"]],"type":[["Result","public type for Result predifined with `error::Error` as Error type"]]});
