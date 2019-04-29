@@ -44,6 +44,10 @@ pub struct Config {
     /// sets the config file (toml) to load the maps
     #[structopt(short = "c", long = "config", default_value = "./config.toml")]
     pub config: String,
+
+    /// show the licens under which this software is licensed
+    #[structopt(long="license")]
+    pub license: bool,
 }
 
 impl Config {
@@ -52,6 +56,11 @@ impl Config {
     /// The function takes the config from itself, and serves the server as descriped
     /// in this config.
     pub fn run(&self) {
+        // check if license is set to true
+        if self.license {
+            Self::show_license();
+            std::process::exit(0);  // exit programm
+        }
         println!(
             "Starting {} server on port: {}",
             "PokeEscape".green(),
@@ -113,5 +122,14 @@ impl Config {
                 })
                 .unwrap(); // FIXME: unwrap
         }
+    }
+
+    /// prints the license to stdout
+    pub fn show_license() {
+        println!("This software is licensed under GPLv3+
+PokeEscape-server  Copyright (C) 2019  Finn Behrens
+    This program comes with ABSOLUTELY NO WARRANTY;
+    This is free software, and you are welcome to redistribute it
+    under certain conditions;", )
     }
 }
