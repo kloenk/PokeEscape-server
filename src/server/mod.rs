@@ -59,7 +59,11 @@ pub fn handle_pokemon_client(mut stream: TcpStream) -> Result<TcpStream> {
     Ok(stream)
 }
 
+/// Job as parameter for negotiate to give the TCPStream and the verbose state
 pub struct Job {
+    /// TcpStream of the client
     pub stream: TcpStream,
+
+    /// verbose state
     pub verbose: bool,
 }
