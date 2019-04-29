@@ -1,5 +1,4 @@
 use structopt::StructOpt; // imported for trait use
-
 use poke_escape_server::Config; // config object (also hold cli arguments)
 
 fn main() {

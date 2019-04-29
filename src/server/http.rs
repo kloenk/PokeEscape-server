@@ -3,7 +3,7 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::net::TcpStream;
 
-/// reexport Result type
+#[doc(inline)]
 pub use super::super::error::Result;
 
 /// This function is called when the client protocol seems to be HTTP

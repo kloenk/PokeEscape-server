@@ -8,28 +8,38 @@ use serde_derive::Serialize;
 
 use super::error::Error;
 
-/// reexport error Result type
+#[doc(inline)]
 pub use super::error::Result;
 
-/// defines the width of the map
+/// defines the widht of the map 
+/// 
+/// creates warning and 0 an the right end if map in file is smaller,
+/// or crops the right side if map is bigger
 pub const WIDTH: usize = 20;
 
 
 /// struct holding all informations of the toml file
-/// this is not a deserialisable struct, so every map can live at top level
+// this is not a deserialisable struct, so every map can live at top level
 pub struct MapPlaces {
+    /// defines the version of the toml file
     p_version: Version,
+
+    /// stores available (set for loading) maps
     p_maps: HashMap<String, MapInfo>,
 }
 
 impl MapPlaces {
-    /// parses toml file and creates a new MapPlaces instance
+    /// Loads toml file and deserialize it into `MapPlaces`
+    /// 
+    /// # Arguments
+    /// - `file` -> give the path of the toml file to load
+    /// - `verbose` -> if set true shows status of loading
     pub fn new(file: &str, verbose: bool) -> Result<Self> {
         if verbose {
             println!("Loading {} from {}", "Maps".green(), file.blue());
         }
 
-        let file = fs::read_to_string(file)?;
+        let file = fs::read_to_string(file)?;   //FIXME: testing
         let content: Value = toml::from_str(file.as_str())?;
 
         if content.get("Maps") == None {
@@ -54,7 +64,7 @@ impl MapPlaces {
         })
     }
 
-    /// return vector of possible map names
+    /// list all maps described in this `MapPlaces`
     pub fn available_maps(&self) -> Vec<String> {
         let mut vec = Vec::new();
 
@@ -73,6 +83,10 @@ impl MapPlaces {
         }
     }
 
+    /// return the Map with the given Name
+    /// 
+    /// This function take a name as argument and returns the loaded Map
+    /// associated with the given name
     pub fn get(&self, name: &str) -> Result<Map> {
         match self.p_maps.get(name) {   // FIXME: version foo for random feature
             Some(data) => data.load_map(),
@@ -192,6 +206,7 @@ impl MapInfo {
         }
     }
 
+    /// Read toml value and returns a HashMap with the maps specified in the toml file
     pub fn from_conf(toml: &toml::Value, verbose: bool) -> Result<HashMap<String, Self>> {
         if toml["Maps"].get("maps") == None {
             return Err(Error::new_field_not_exists("Maps.maps".to_string()));
@@ -248,6 +263,12 @@ impl MapInfo {
         Ok(maps)
     }
 
+    /// reads one map from the toml and and returns the Map
+    /// 
+    /// # Parameters
+    /// `toml` - The toml Value of the given Map
+    /// `name` - Name of the map to read
+    /// `verbose` - set to true for debug output 
     fn from_conf_one(toml: &toml::Value, name: String, verbose: bool) -> Result<Self> {
         let file = match toml.get("path") {
             Some(path) => path,
@@ -275,7 +296,7 @@ impl MapInfo {
             None => "JSON",
         };
 
-        let author: Option<Vec<String>> = match toml.get("author") {
+        let author: Option<Vec<String>> = match toml.get("author") {    // read author from toml file
             Some(a) => {
                 let mut nan: bool = false;
                 let mut ret = Vec::new();

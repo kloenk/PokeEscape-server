@@ -1,13 +1,14 @@
 use std::fmt;
 use std::io;
 
-// tests as sub file
-#[cfg(test)]
+// tests as sub module
+#[cfg(test)]    // only add when running tests
 mod test;
 
 /// public type for Result predifined with `error::Error` as Error type
 pub type Result<T> = std::result::Result<T, Error>;
 
+/// Error object used for Return values
 pub struct Error {
     my_kind: ErrorKind,
 }
@@ -33,6 +34,7 @@ impl Error {
         Self::new(ErrorKind::FieldNotExists(field))
     }
 
+    /// converts a `std::io::ErrorKind` to an own ErrorKind enum
     fn io_to_kind(kind: io::ErrorKind) -> ErrorKind {
         match kind {
             io::ErrorKind::NotFound => ErrorKind::IoNotFound,
@@ -58,7 +60,7 @@ impl Error {
     }
 }
 
-/// print trait
+/// implement std::fmt::Display to allow printing and to_string()
 impl fmt::Display for Error {
     /// standart formater for print! macro
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -66,7 +68,7 @@ impl fmt::Display for Error {
     }
 }
 
-/// Debug print trait
+/// implement std::fmt::Debug to allow Debug acces to the error
 impl fmt::Debug for Error {
     /// formater for `Debug` in print! macro
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -74,6 +76,7 @@ impl fmt::Debug for Error {
     }
 }
 
+/// implement std::convert::From for std::io::Error
 impl std::convert::From<std::io::Error> for Error {
     fn from(io_error: std::io::Error) -> Self {
         let kind = Error::io_to_kind(io_error.kind());
@@ -81,6 +84,7 @@ impl std::convert::From<std::io::Error> for Error {
     }
 }
 
+/// implement std::convert::From for std::io::ErrorKind
 impl std::convert::From<std::io::ErrorKind> for Error {
     fn from(io_kind: std::io::ErrorKind) -> Self {
         let kind = Error::io_to_kind(io_kind);
@@ -88,6 +92,7 @@ impl std::convert::From<std::io::ErrorKind> for Error {
     }
 }
 
+/// implement std::convert::From for string 
 impl std::convert::From<std::string::String> for Error {
     fn from(string: String) -> Self {
         Error {
@@ -96,21 +101,25 @@ impl std::convert::From<std::string::String> for Error {
     }
 }
 
+/// implement std::convert::From for toml::de::Error
 impl std::convert::From<toml::de::Error> for Error {
     fn from(err: toml::de::Error) -> Self {
         Error {
-            my_kind: ErrorKind::Other(err.to_string()), // FIXME: create own error type
+            my_kind: ErrorKind::NotParsable(err.to_string()),
         }
     }
 }
 
+/// implement std::convert::from for serde_json::error::Error
 impl std::convert::From<serde_json::error::Error> for Error {
     fn from(err: serde_json::error::Error) -> Self {
         Error {
-            my_kind: ErrorKind::Other(err.to_string()),
+            my_kind: ErrorKind::NotParsable(err.to_string()),
         }
     }
 }
+
+/// implement std::convert::from for semver::SemVerError
 impl std::convert::From<semver::SemVerError> for Error {
     fn from(err: semver::SemVerError) -> Self {
         let error = match err {
@@ -122,14 +131,16 @@ impl std::convert::From<semver::SemVerError> for Error {
     }
 }
 
+/// implement std::cmp::PartialEq for Error to provied the `==` operator
 impl std::cmp::PartialEq for Error {
     fn eq(&self, other: &Error) -> bool {
         self.my_kind == other.my_kind
     }
 }
 
+/// ErrorKind represents the internal Error type of the Error
 #[derive(Clone, PartialEq)]
-pub enum ErrorKind {
+pub enum ErrorKind {    // FIXME: private or rename to Error
     /// Io Not Found error, transformed `from std::io::ErrorKind::NotFound`
     IoNotFound,
 
@@ -189,7 +200,10 @@ pub enum ErrorKind {
 
     /// Field Not Exists, raised when a important field is missing in config
     /// also raised if file is of the wrong type
-    FieldNotExists(String),
+    FieldNotExists(String), // TODO: create better type for data
+
+    /// Not Parsable error, raised when serde reports an error
+    NotParsable(String),    // TODO: create better type for data
 
     /// No Version Supplied error, used if the version of the client is none
     NoVersionSupplied,
@@ -212,6 +226,7 @@ pub enum ErrorKind {
 }
 
 impl ErrorKind {
+    /// represents the type as String
     fn convert_to_string(&self) -> String {
         match self {
             ErrorKind::IoNotFound => String::from("IoNotFound"),
@@ -234,6 +249,7 @@ impl ErrorKind {
             ErrorKind::IoUnexpectedEof => String::from("IoUnexpectedEof"),
             ErrorKind::FormatNotSupported => String::from("FormatNotSupported"),
             ErrorKind::FieldNotExists(data) => format!("FieldNotExists({})", data),
+            ErrorKind::NotParsable(data) => format!("NotParsable({})", data),
             ErrorKind::NoVersionSupplied => String::from("NoVersionSupplied"),
             ErrorKind::VersionNotParsable(data) => format!("VersionNotParsable({})", data),
             ErrorKind::PoolToSmall => String::from("PoolToSmall"),
@@ -248,12 +264,13 @@ impl ErrorKind {
         }
     }
 
+    /// returns the name of the field of the enum as String
     pub fn error_string(&self) -> String {
         self.convert_to_string()
     }
 }
 
-/// print trait
+/// implements std::fmt::Display to provide printing and to_string()
 impl fmt::Display for ErrorKind {
     /// standart formater for print! macro
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -269,6 +286,7 @@ impl fmt::Debug for ErrorKind {
     }
 }
 
+/// implement std::convert::From for std::io::ErrorKind
 impl std::convert::From<std::io::ErrorKind> for ErrorKind {
     fn from(io_kind: std::io::ErrorKind) -> Self {
         Error::io_to_kind(io_kind)

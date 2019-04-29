@@ -1,47 +1,56 @@
+//! # Poké Escape server
+//! PokéEscape is a game created in School as a group Project.
+//! This project contains the source code for the server, talking 
+//! with the client written in GreenFoot (java)
+#![deny(missing_docs)]
 use colored::*;
 use std::net::TcpListener;
 use std::process;
 use structopt::StructOpt;
 
+/// general tcp module for talking with the client and negotiating the
+/// protocoll to use
 pub mod server;
 
-/// threads contains the struct ThreadPool and all helper functions
+/// ThreadPool module
 pub mod threads;
 
-/// module that holds error structures for use in `Result<T, error::Error>`
+/// module providing error Type/conversion
 pub mod error;
 
-/// module containing map loader
+/// module providing map loader
 pub mod map;
 
-/// Config is a interface designed to use with structopt on the cli, but also to run the code
-///
+/// struct deriving cli parsing. It also implements the run function, serving the main function
 #[derive(StructOpt, Debug)]
 #[structopt(raw(setting = "structopt::clap::AppSettings::ColoredHelp"))]
 pub struct Config {
-    /// The port to run on
+    /// configures the port to listen on
     #[structopt(short = "p", long = "port", default_value = "1996")]
     pub port: u16,
 
-    /// address to listen on
+    /// configures the interface (ip) to listen on
     #[structopt(short = "H", long = "host", default_value = "127.0.0.1")]
     pub host: String,
 
-    /// Set application into verbose mode
+    /// enables verbose mode
     #[structopt(short = "v", long = "verbose")]
     pub verbose: bool,
 
-    /// Set number of running threads
+    /// defines the number of thread in ThreadPool to use
     #[structopt(short = "t", long = "threads", default_value = "8")]
     pub threads: usize,
 
-    /// config file for maps (toml)
+    /// sets the config file (toml) to load the maps
     #[structopt(short = "c", long = "config", default_value = "./config.toml")]
     pub config: String,
 }
 
 impl Config {
-    /// Main function for the server
+    /// run function serving as the main function of the librarie.AsMut
+    /// 
+    /// The function takes the config from itself, and serves the server as descriped
+    /// in this config.
     pub fn run(&self) {
         println!(
             "Starting {} server on port: {}",
@@ -66,6 +75,7 @@ impl Config {
             }
         };        
 
+        // create ThreadPool
         let mut thread_pool = threads::ThreadPool::new(self.threads).unwrap_or_else(|err| {
             println!("Error creating threadPool: {}", err.to_string().red());
             process::exit(-2);
@@ -85,8 +95,10 @@ impl Config {
             self.host.green(),
             self.port.to_string().green()
         );
+        // open socket
         let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap(); //FIXME: !!!
 
+        // handle incomming streams
         for stream in listener.incoming() {
             let stream = stream.unwrap(); // FIXME: unwrap
             let conf = server::Job {
@@ -94,6 +106,7 @@ impl Config {
                 verbose: self.verbose,
             };
 
+            // execute Job in ThreadPool
             thread_pool
                 .execute(move || {
                     server::negotiate(conf).unwrap(); //FIXME: unwrap

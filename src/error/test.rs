@@ -228,6 +228,18 @@ mod error_kind_error_string {
     }
 
     #[test]
+    fn field_not_exists() {
+        let kind = ErrorKind::FieldNotExists("test".to_string());
+        assert_eq!(kind.error_string(), String::from("FieldNotExists(test)"));
+    }
+
+    #[test]
+    fn not_parsable() {
+        let kind = ErrorKind::NotParsable("test".to_string());
+        assert_eq!(kind.error_string(), String::from("NotParsable(test)"));
+    }
+
+    #[test]
     fn no_version_supplied() {
         let kind = ErrorKind::NoVersionSupplied;
         assert_eq!(kind.error_string(), String::from("NoVersionSupplied"));
