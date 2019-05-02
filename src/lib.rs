@@ -127,7 +127,8 @@ impl Config {
     /// prints the license to stdout
     pub fn show_license() {
         println!("This software is licensed under GPLv3+
-PokeEscape-server  Copyright (C) 2019  Finn Behrens
+PokeEscape-server  Copyright (C) 2019  Finn Behrens,
+    Janina Lanz, Zoe Horsten, Malissa Schultke, Enna Freihoff
     This program comes with ABSOLUTELY NO WARRANTY;
     This is free software, and you are welcome to redistribute it
     under certain conditions;", )
