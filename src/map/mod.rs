@@ -470,16 +470,20 @@ impl MapInfo {
             Some(j) => j,
             None => return Err(Error::new_field_not_exists("map".to_string())),
         };
+        let mut user_warned = false;
         for v in j_map {
             let v = match v.as_array() {
                 Some(j) => j,
                 None => return Err(Error::new_field_not_exists("map".to_string())),
             };
-            if v.len() < WIDTH {
-                eprintln!("map smaller than {} collums", WIDTH);
-            } else if v.len() > WIDTH {
-                eprintln!("map to big");
-                return Err(Error::new_field_not_exists("map".to_string())); // FIXME: crop if to big
+            if !user_warned{
+                if v.len() < WIDTH {
+                    eprintln!("map smaller than {} collums", WIDTH);
+                    user_warned = true;
+                } else if v.len() > WIDTH {
+                    eprintln!("map to big");
+                    user_warned = true;
+                }
             }
             let mut row: [u8; WIDTH] = [0; WIDTH];
             for i in 0..WIDTH {
