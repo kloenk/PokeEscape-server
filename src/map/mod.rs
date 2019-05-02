@@ -139,6 +139,12 @@ impl Map {
         self.p_name.clone() // returns a clone
     }
 
+    /// get size of map
+    pub fn size(&self) -> String {
+
+        format!("{}x{}", WIDTH, self.p_map.len())
+    }
+
     /// check if the feature exists
     pub fn feature(&self, feature: &String) -> bool {
         match &self.p_features {
@@ -407,7 +413,7 @@ impl MapInfo {
     /// load and return a map
     pub fn load_map(&self) -> Result<Map> {
         if self.p_verbose {
-            println!("Loading {} from {}", self.p_name.green(), self.p_file.blue());
+            print!("Loading {} from {}...  ", self.p_name.green(), self.p_file.blue());
         }
 
         // read json
@@ -478,10 +484,10 @@ impl MapInfo {
             };
             if !user_warned{
                 if v.len() < WIDTH {
-                    eprintln!("map smaller than {} collums", WIDTH);
+                    eprintln!("\nmap smaller than {} collums", WIDTH);
                     user_warned = true;
                 } else if v.len() > WIDTH {
-                    eprintln!("map to big");
+                    eprintln!("\nmap to big");
                     user_warned = true;
                 }
             }
@@ -501,12 +507,18 @@ impl MapInfo {
         }
         drop(j_map);    // remove j_map
 
-        Ok(
-            Map{
+        let ret = Map{
                 p_name: name,
                 p_features: features,
                 p_map: map,
-            }
+        };
+
+        if self.p_verbose {
+            println!("[{}]: Loaded Map {} with size {}", "Ok".green(), ret.p_name.blue(), ret.size().yellow())
+        }
+
+        Ok(
+            ret
         )
     }
 }
