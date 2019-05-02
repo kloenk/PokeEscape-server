@@ -13,3 +13,8 @@ version = "0.1.0"
 path = "./maps/Sailing_Island.map"
 author = ["Finn Behrens <finn@kloenk.de>"]
 format = "json"
+
+[Forrest]
+version = "0.1.0"
+path = "./maps/wald.map"
+format = "json"
