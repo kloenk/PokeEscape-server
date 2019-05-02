@@ -15,7 +15,7 @@ pub use super::error::Result;
 /// 
 /// creates warning and 0 an the right end if map in file is smaller,
 /// or crops the right side if map is bigger
-pub const WIDTH: usize = 20;
+pub const WIDTH: usize = 28;
 
 
 /// struct holding all informations of the toml file
@@ -109,6 +109,23 @@ impl MapPlaces {
 }
 
 /// Map holds a map ready to send to a client
+/// 
+/// # Meanings 
+/// | Number | Block           | Variant                 |
+/// |--------|-----------------|-------------------------|
+/// | 0      | None            |                         |
+/// | 1      | Solid Block     |                         |
+/// | 2      | Water           |                         |
+/// | 3      | Trap            |                         |
+/// | 4      | Moving platform |                         |
+/// | 5      | Start point     | player                  |
+/// | 6      | Berry           | Energy                  |
+/// | 7      | Berry           | HP                      |
+/// | 8      | Berry           | XP                      |
+/// | 9      | Enemy           | 100% speed              |
+/// | 10     | Enemy           | 150% speed; 120% damage |
+/// | 11     | Teleport        |                         |
+/// | 12     | Moving platform |                         |
 #[derive(Serialize)]
 pub struct Map {
     p_name: String,
@@ -120,6 +137,12 @@ impl Map {
     /// returns the name of the map
     pub fn name(&self) -> String {
         self.p_name.clone() // returns a clone
+    }
+
+    /// get size of map
+    pub fn size(&self) -> String {
+
+        format!("{}x{}", WIDTH, self.p_map.len())
     }
 
     /// check if the feature exists
@@ -390,7 +413,7 @@ impl MapInfo {
     /// load and return a map
     pub fn load_map(&self) -> Result<Map> {
         if self.p_verbose {
-            println!("Loading {} from {}", self.p_name.green(), self.p_file.blue());
+            print!("Loading {} from {}...  ", self.p_name.green(), self.p_file.blue());
         }
 
         // read json
@@ -453,37 +476,49 @@ impl MapInfo {
             Some(j) => j,
             None => return Err(Error::new_field_not_exists("map".to_string())),
         };
+        let mut user_warned = false;
         for v in j_map {
             let v = match v.as_array() {
                 Some(j) => j,
                 None => return Err(Error::new_field_not_exists("map".to_string())),
             };
-            if v.len() < WIDTH {
-                eprintln!("map smaller than {} collums", WIDTH);
-            } else if v.len() > WIDTH {
-                eprintln!("map to big");
-                return Err(Error::new_field_not_exists("map".to_string())); // FIXME: crop if to big
+            if !user_warned{
+                if v.len() < WIDTH {
+                    eprintln!("\nmap smaller than {} collums", WIDTH);
+                    user_warned = true;
+                } else if v.len() > WIDTH {
+                    eprintln!("\nmap to big");
+                    user_warned = true;
+                }
             }
-            let mut i = 0;  // index for row
             let mut row: [u8; WIDTH] = [0; WIDTH];
-            for b in v {
-                let b = match b.as_integer() {
-                    Some(j) => j,
-                    None => return Err(Error::new_field_not_exists("map".to_string())),
+            for i in 0..WIDTH {
+                let b = match v.get(i) {
+                    Some(b) => b.as_integer(),
+                    None => None,
                 };
-                row[i] = b as u8;
-                i += 1;
+                let b = match b {
+                    Some(b) => b as u8,
+                    None => 1 as u8,  // return solid block 
+                };
+                row[i] = b;
             }
             map.push(row);
         }
         drop(j_map);    // remove j_map
 
-        Ok(
-            Map{
+        let ret = Map{
                 p_name: name,
                 p_features: features,
                 p_map: map,
-            }
+        };
+
+        if self.p_verbose {
+            println!("[{}]: Loaded Map {} with size {}", "Ok".green(), ret.p_name.blue(), ret.size().yellow())
+        }
+
+        Ok(
+            ret
         )
     }
 }
