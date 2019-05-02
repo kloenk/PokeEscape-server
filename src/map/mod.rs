@@ -109,6 +109,23 @@ impl MapPlaces {
 }
 
 /// Map holds a map ready to send to a client
+/// 
+/// # Meanings 
+/// | Number | Block           | Variant                 |
+/// |--------|-----------------|-------------------------|
+/// | 0      | None            |                         |
+/// | 1      | Solid Block     |                         |
+/// | 2      | Water           |                         |
+/// | 3      | Trap            |                         |
+/// | 4      | Moving platform |                         |
+/// | 5      | Start point     | player                  |
+/// | 6      | Berry           | Energy                  |
+/// | 7      | Berry           | HP                      |
+/// | 8      | Berry           | XP                      |
+/// | 9      | Enemy           | 100% speed              |
+/// | 10     | Enemy           | 150% speed; 120% damage |
+/// | 11     | Teleport        |                         |
+/// | 12     | Moving platform |                         |
 #[derive(Serialize)]
 pub struct Map {
     p_name: String,
