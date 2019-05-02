@@ -499,7 +499,7 @@ impl MapInfo {
                 };
                 let b = match b {
                     Some(b) => b as u8,
-                    None => 1 as u8,  // return non block 
+                    None => 1 as u8,  // return solid block 
                 };
                 row[i] = b;
             }
