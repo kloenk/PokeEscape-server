@@ -481,15 +481,17 @@ impl MapInfo {
                 eprintln!("map to big");
                 return Err(Error::new_field_not_exists("map".to_string())); // FIXME: crop if to big
             }
-            let mut i = 0;  // index for row
             let mut row: [u8; WIDTH] = [0; WIDTH];
-            for b in v {
-                let b = match b.as_integer() {
-                    Some(j) => j,
-                    None => return Err(Error::new_field_not_exists("map".to_string())),
+            for i in 0..WIDTH {
+                let b = match v.get(i) {
+                    Some(b) => b.as_integer(),
+                    None => None,
                 };
-                row[i] = b as u8;
-                i += 1;
+                let b = match b {
+                    Some(b) => b as u8,
+                    None => 0 as u8,  // return non block 
+                };
+                row[i] = b;
             }
             map.push(row);
         }
