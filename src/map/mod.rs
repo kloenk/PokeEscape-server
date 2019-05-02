@@ -15,7 +15,7 @@ pub use super::error::Result;
 /// 
 /// creates warning and 0 an the right end if map in file is smaller,
 /// or crops the right side if map is bigger
-pub const WIDTH: usize = 20;
+pub const WIDTH: usize = 28;
 
 
 /// struct holding all informations of the toml file
