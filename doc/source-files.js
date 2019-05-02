@@ -1,16 +1,21 @@
 var N = null;var sourcesIndex = {};
 sourcesIndex["ansi_term"] = {"name":"","dirs":[],"files":["ansi.rs","debug.rs","difference.rs","display.rs","lib.rs","style.rs","windows.rs","write.rs"]};
+sourcesIndex["approx"] = {"name":"","dirs":[],"files":["lib.rs","macros.rs"]};
 sourcesIndex["atty"] = {"name":"","dirs":[],"files":["lib.rs"]};
 sourcesIndex["bitflags"] = {"name":"","dirs":[],"files":["lib.rs"]};
+sourcesIndex["cgmath"] = {"name":"","dirs":[],"files":["angle.rs","conv.rs","euler.rs","lib.rs","macros.rs","matrix.rs","num.rs","point.rs","prelude.rs","projection.rs","quaternion.rs","rotation.rs","structure.rs","transform.rs","vector.rs"]};
 sourcesIndex["clap"] = {"name":"","dirs":[{"name":"app","dirs":[],"files":["help.rs","meta.rs","mod.rs","parser.rs","settings.rs","usage.rs","validator.rs"]},{"name":"args","dirs":[{"name":"arg_builder","dirs":[],"files":["base.rs","flag.rs","mod.rs","option.rs","positional.rs","switched.rs","valued.rs"]}],"files":["any_arg.rs","arg.rs","arg_matcher.rs","arg_matches.rs","group.rs","macros.rs","matched_arg.rs","mod.rs","settings.rs","subcommand.rs"]},{"name":"completions","dirs":[],"files":["bash.rs","elvish.rs","fish.rs","macros.rs","mod.rs","powershell.rs","shell.rs","zsh.rs"]}],"files":["errors.rs","fmt.rs","lib.rs","macros.rs","map.rs","osstringext.rs","strext.rs","suggestions.rs","usage_parser.rs"]};
 sourcesIndex["colored"] = {"name":"","dirs":[],"files":["color.rs","control.rs","lib.rs","style.rs"]};
 sourcesIndex["heck"] = {"name":"","dirs":[],"files":["camel.rs","kebab.rs","lib.rs","mixed.rs","shouty_snake.rs","snake.rs","title.rs"]};
 sourcesIndex["itoa"] = {"name":"","dirs":[],"files":["lib.rs"]};
 sourcesIndex["lazy_static"] = {"name":"","dirs":[],"files":["inline_lazy.rs","lib.rs"]};
 sourcesIndex["libc"] = {"name":"","dirs":[{"name":"unix","dirs":[{"name":"notbsd","dirs":[{"name":"linux","dirs":[{"name":"other","dirs":[{"name":"b64","dirs":[],"files":["mod.rs","not_x32.rs","x86_64.rs"]}],"files":["align.rs","mod.rs"]}],"files":["align.rs","mod.rs"]}],"files":["mod.rs"]}],"files":["align.rs","mod.rs"]}],"files":["lib.rs","macros.rs"]};
+sourcesIndex["num_traits"] = {"name":"","dirs":[],"files":["lib.rs"]};
 sourcesIndex["poke_escape_server"] = {"name":"","dirs":[{"name":"error","dirs":[],"files":["mod.rs"]},{"name":"map","dirs":[],"files":["mod.rs"]},{"name":"server","dirs":[],"files":["http.rs","mod.rs"]}],"files":["lib.rs","threads.rs"]};
 sourcesIndex["proc_macro2"] = {"name":"","dirs":[],"files":["fallback.rs","lib.rs","strnom.rs","wrapper.rs"]};
 sourcesIndex["quote"] = {"name":"","dirs":[],"files":["ext.rs","lib.rs","to_tokens.rs"]};
+sourcesIndex["rand"] = {"name":"","dirs":[{"name":"distributions","dirs":[],"files":["exponential.rs","gamma.rs","mod.rs","normal.rs","range.rs","ziggurat_tables.rs"]},{"name":"prng","dirs":[],"files":["chacha.rs","isaac.rs","isaac64.rs","mod.rs","xorshift.rs"]}],"files":["jitter.rs","lib.rs","os.rs","rand_impls.rs","read.rs","reseeding.rs","seq.rs"]};
+sourcesIndex["rgb"] = {"name":"","dirs":[{"name":"internal","dirs":[{"name":"convert","dirs":[],"files":["array.rs","mod.rs","tuple.rs"]}],"files":["ops.rs","pixel.rs","rgb.rs","rgba.rs"]}],"files":["alt.rs","lib.rs"]};
 sourcesIndex["ryu"] = {"name":"","dirs":[{"name":"buffer","dirs":[],"files":["mod.rs"]},{"name":"pretty","dirs":[],"files":["exponent.rs","mantissa.rs","mod.rs"]}],"files":["common.rs","d2s.rs","d2s_full_table.rs","d2s_intrinsics.rs","digit_table.rs","f2s.rs","lib.rs"]};
 sourcesIndex["semver"] = {"name":"","dirs":[],"files":["lib.rs","version.rs","version_req.rs"]};
 sourcesIndex["semver_parser"] = {"name":"","dirs":[],"files":["common.rs","lib.rs","range.rs","recognize.rs","version.rs"]};
@@ -27,4 +32,6 @@ sourcesIndex["unicode_segmentation"] = {"name":"","dirs":[],"files":["grapheme.r
 sourcesIndex["unicode_width"] = {"name":"","dirs":[],"files":["lib.rs","tables.rs"]};
 sourcesIndex["unicode_xid"] = {"name":"","dirs":[],"files":["lib.rs","tables.rs"]};
 sourcesIndex["vec_map"] = {"name":"","dirs":[],"files":["lib.rs"]};
+sourcesIndex["winapi"] = {"name":"","dirs":[],"files":["lib.rs"]};
+sourcesIndex["winconsole"] = {"name":"","dirs":[],"files":["lib.rs"]};
 createSourceSidebar();
