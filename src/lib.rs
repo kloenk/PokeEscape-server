@@ -41,7 +41,7 @@ pub struct Config {
 impl Config {
     /// new creates a struct with default values
     pub fn new() -> Self {
-        Self{
+        Self {
             port: 1996,
             host: "127.0.0.1".to_string(),
             verbose: false,

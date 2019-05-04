@@ -75,7 +75,8 @@ fn main() {
                         .long("output"),
                 )
                 .setting(clap::AppSettings::ColorAuto)
-                .setting(clap::AppSettings::ColoredHelp))
+                .setting(clap::AppSettings::ColoredHelp),
+        )
         .setting(AppSettings::ColorAuto)
         .setting(AppSettings::ColoredHelp);
 
@@ -102,7 +103,8 @@ fn main() {
 
     // Vary the output based on how many times the user used the "verbose" flag
     // (i.e. 'myprog -v -v -v' or 'myprog -vvv' vs 'myprog -v'
-    match matches.occurrences_of("verbose") { // FIXME: more vebose options
+    match matches.occurrences_of("verbose") {
+        // FIXME: more vebose options
         0 => config.verbose = false,
         1 | _ => config.verbose = true,
     };

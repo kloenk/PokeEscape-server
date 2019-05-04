@@ -2,7 +2,7 @@ use std::fmt;
 use std::io;
 
 // tests as sub module
-#[cfg(test)]    // only add when running tests
+#[cfg(test)] // only add when running tests
 mod test;
 
 /// public type for Result predifined with `error::Error` as Error type
@@ -92,7 +92,7 @@ impl std::convert::From<std::io::ErrorKind> for Error {
     }
 }
 
-/// implement std::convert::From for string 
+/// implement std::convert::From for string
 impl std::convert::From<std::string::String> for Error {
     fn from(string: String) -> Self {
         Error {
@@ -140,7 +140,8 @@ impl std::cmp::PartialEq for Error {
 
 /// ErrorKind represents the internal Error type of the Error
 #[derive(Clone, PartialEq)]
-pub enum ErrorKind {    // FIXME: private or rename to Error
+pub enum ErrorKind {
+    // FIXME: private or rename to Error
     /// Io Not Found error, transformed `from std::io::ErrorKind::NotFound`
     IoNotFound,
 
@@ -203,7 +204,7 @@ pub enum ErrorKind {    // FIXME: private or rename to Error
     FieldNotExists(String), // TODO: create better type for data
 
     /// Not Parsable error, raised when serde reports an error
-    NotParsable(String),    // TODO: create better type for data
+    NotParsable(String), // TODO: create better type for data
 
     /// No Version Supplied error, used if the version of the client is none
     NoVersionSupplied,
@@ -253,12 +254,10 @@ impl ErrorKind {
             ErrorKind::NoVersionSupplied => String::from("NoVersionSupplied"),
             ErrorKind::VersionNotParsable(data) => format!("VersionNotParsable({})", data),
             ErrorKind::PoolToSmall => String::from("PoolToSmall"),
-            ErrorKind::PoolSendError(t) => {
-                match t {
-                    true => String::from("PoolSendError(Job)"),
-                    false => String::from("PoolSendError(Terminate)"),
-                }
-            }
+            ErrorKind::PoolSendError(t) => match t {
+                true => String::from("PoolSendError(Job)"),
+                false => String::from("PoolSendError(Terminate)"),
+            },
             ErrorKind::Other(data) => format!("Other({})", data),
             ErrorKind::Unknown(data) => format!("Unknown({})", data),
         }

@@ -1,22 +1,21 @@
 use colored::*;
 use semver::Version;
+use serde_derive::Serialize;
 use std::collections::HashMap;
 use std::fs;
 use std::str::FromStr;
 use toml::Value;
-use serde_derive::Serialize;
 
 use super::error::Error;
 
 #[doc(inline)]
 pub use super::error::Result;
 
-/// defines the widht of the map 
-/// 
+/// defines the widht of the map
+///
 /// creates warning and 0 an the right end if map in file is smaller,
 /// or crops the right side if map is bigger
 pub const WIDTH: usize = 28;
-
 
 /// struct holding all informations of the toml file
 // this is not a deserialisable struct, so every map can live at top level
@@ -30,7 +29,7 @@ pub struct MapPlaces {
 
 impl MapPlaces {
     /// Loads toml file and deserialize it into `MapPlaces`
-    /// 
+    ///
     /// # Arguments
     /// - `file` -> give the path of the toml file to load
     /// - `verbose` -> if set true shows status of loading
@@ -39,7 +38,7 @@ impl MapPlaces {
             println!("Loading {} from {}", "Maps".green(), file.blue());
         }
 
-        let file = fs::read_to_string(file)?;   //FIXME: testing
+        let file = fs::read_to_string(file)?; //FIXME: testing
         let content: Value = toml::from_str(file.as_str())?;
 
         if content.get("Maps") == None {
@@ -77,20 +76,22 @@ impl MapPlaces {
 
     /// returns the pointer to a specific map
     fn get_map(&self, name: String) -> Result<Map> {
-        match self.p_maps.get(&name) {  // FIXME foo
+        match self.p_maps.get(&name) {
+            // FIXME foo
             Some(data) => data.load_map(),
-            None => Err(Error::new_field_not_exists(name))
+            None => Err(Error::new_field_not_exists(name)),
         }
     }
 
     /// return the Map with the given Name
-    /// 
+    ///
     /// This function take a name as argument and returns the loaded Map
     /// associated with the given name
     pub fn get(&self, name: &str) -> Result<Map> {
-        match self.p_maps.get(name) {   // FIXME: version foo for random feature
+        match self.p_maps.get(name) {
+            // FIXME: version foo for random feature
             Some(data) => data.load_map(),
-            None => Err(Error::new_field_not_exists(name.to_string()))
+            None => Err(Error::new_field_not_exists(name.to_string())),
         }
     }
 
@@ -109,8 +110,8 @@ impl MapPlaces {
 }
 
 /// Map holds a map ready to send to a client
-/// 
-/// # Meanings 
+///
+/// # Meanings
 /// | Number | Block           | Variant                 |
 /// |--------|-----------------|-------------------------|
 /// | 0      | None            |                         |
@@ -141,7 +142,6 @@ impl Map {
 
     /// get size of map
     pub fn size(&self) -> String {
-
         format!("{}x{}", WIDTH, self.p_map.len())
     }
 
@@ -168,7 +168,7 @@ impl Map {
                 }
                 ret
             }
-            None => "".to_string()
+            None => "".to_string(),
         }
     }
 }
@@ -179,7 +179,7 @@ impl std::fmt::Display for Map {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let json = match serde_json::to_string(self) {
             Ok(json) => json,
-            Err(err) => format!("{{\"status\": 100, \"err\": \"{}\"}}", err.to_string()), 
+            Err(err) => format!("{{\"status\": 100, \"err\": \"{}\"}}", err.to_string()),
         };
         write!(f, "{}", json)
     }
@@ -287,11 +287,11 @@ impl MapInfo {
     }
 
     /// reads one map from the toml and and returns the Map
-    /// 
+    ///
     /// # Parameters
     /// `toml` - The toml Value of the given Map
     /// `name` - Name of the map to read
-    /// `verbose` - set to true for debug output 
+    /// `verbose` - set to true for debug output
     fn from_conf_one(toml: &toml::Value, name: String, verbose: bool) -> Result<Self> {
         let file = match toml.get("path") {
             Some(path) => path,
@@ -319,7 +319,8 @@ impl MapInfo {
             None => "JSON",
         };
 
-        let author: Option<Vec<String>> = match toml.get("author") {    // read author from toml file
+        let author: Option<Vec<String>> = match toml.get("author") {
+            // read author from toml file
             Some(a) => {
                 let mut nan: bool = false;
                 let mut ret = Vec::new();
@@ -329,7 +330,7 @@ impl MapInfo {
                         None => {
                             nan = true;
                             "NaN".to_string()
-                        },
+                        }
                     };
                     ret.push(b);
                 } else if a.is_array() {
@@ -339,7 +340,7 @@ impl MapInfo {
                             None => {
                                 nan = true;
                                 "NaN".to_string()
-                            },
+                            }
                         };
                         ret.push(b);
                     }
@@ -348,9 +349,9 @@ impl MapInfo {
                 }
                 match nan {
                     true => None,
-                    false => Some(ret)
+                    false => Some(ret),
                 }
-            },
+            }
             None => None,
         };
 
@@ -362,13 +363,7 @@ impl MapInfo {
             return Err(Error::new(super::error::ErrorKind::FormatNotSupported));
         }
 
-        Ok(Self::new(
-            name,
-            file,
-            version,
-            format,
-            author,
-            verbose))
+        Ok(Self::new(name, file, version, format, author, verbose))
     }
 
     /// returns the name of the Map it hold information about
@@ -413,23 +408,27 @@ impl MapInfo {
     /// load and return a map
     pub fn load_map(&self) -> Result<Map> {
         if self.p_verbose {
-            print!("Loading {} from {}...  ", self.p_name.green(), self.p_file.blue());
+            print!(
+                "Loading {} from {}...  ",
+                self.p_name.green(),
+                self.p_file.blue()
+            );
         }
 
         // read json
         let file = fs::read_to_string(&self.p_file)?;
         let content: Value = serde_json::from_str(file.as_str())?;
 
-
         // get name
         let name: String = match content.get("name") {
-            Some(name) => { match name.as_str() {
+            Some(name) => match name.as_str() {
                 Some(name) => name.to_string(),
                 None => return Err(Error::new_field_not_exists("name".to_string())),
-            }},
+            },
             None => return Err(Error::new_field_not_exists("name".to_string())),
         };
-        if name != self.p_name {    // check name
+        if name != self.p_name {
+            // check name
             eprintln!("Map name {} differs from name {}", name, self.p_name);
         }
 
@@ -442,17 +441,20 @@ impl MapInfo {
                 let mut fe = Vec::new();
                 for v in f.as_array().unwrap() {
                     if !v.is_str() {
-                        return Err(Error::new_field_not_exists("features is not string".to_string()))
+                        return Err(Error::new_field_not_exists(
+                            "features is not string".to_string(),
+                        ));
                     }
                     fe.push(v.as_str().unwrap().to_string());
                 }
-                features = Some(fe);    // attach to fe
+                features = Some(fe); // attach to fe
             } else if f.is_str() {
-                features = Some(vec!(f.as_str().unwrap().to_string()));
+                features = Some(vec![f.as_str().unwrap().to_string()]);
             }
         }
-        drop(f);    // remove f
-        features = match features { // check if it only says none
+        drop(f); // remove f
+        features = match features {
+            // check if it only says none
             Some(f) => {
                 let mut ret: Option<Vec<String>> = Some(f.clone());
                 if f.len() == 1 {
@@ -461,10 +463,9 @@ impl MapInfo {
                     }
                 }
                 ret
-            },
+            }
             None => None,
         };
-
 
         // load map
         let mut map: Vec<[u8; WIDTH]> = Vec::new();
@@ -482,7 +483,7 @@ impl MapInfo {
                 Some(j) => j,
                 None => return Err(Error::new_field_not_exists("map".to_string())),
             };
-            if !user_warned{
+            if !user_warned {
                 if v.len() < WIDTH {
                     eprintln!("\nmap smaller than {} collums", WIDTH);
                     user_warned = true;
@@ -499,27 +500,30 @@ impl MapInfo {
                 };
                 let b = match b {
                     Some(b) => b as u8,
-                    None => 1 as u8,  // return solid block 
+                    None => 1 as u8, // return solid block
                 };
                 row[i] = b;
             }
             map.push(row);
         }
-        drop(j_map);    // remove j_map
+        drop(j_map); // remove j_map
 
-        let ret = Map{
-                p_name: name,
-                p_features: features,
-                p_map: map,
+        let ret = Map {
+            p_name: name,
+            p_features: features,
+            p_map: map,
         };
 
         if self.p_verbose {
-            println!("[{}]: Loaded Map {} with size {}", "Ok".green(), ret.p_name.blue(), ret.size().yellow())
+            println!(
+                "[{}]: Loaded Map {} with size {}",
+                "Ok".green(),
+                ret.p_name.blue(),
+                ret.size().yellow()
+            )
         }
 
-        Ok(
-            ret
-        )
+        Ok(ret)
     }
 }
 
