@@ -160,13 +160,29 @@ fn completion(args: &clap::ArgMatches, app: &mut App) {
         shell = Shell::Bash;
     }
 
-    let mut path = match args.value_of("out") {
-        Some(_path) => std::io::stdout(), //FIXME: !!
+    use std::io::Write;
+    use std::io::BufWriter;
+    use std::fs::File;
+
+    /*let mut path: std::io::Write = match args.value_of("out") {
+        Some(path) => match std::fs::File::create(path) {
+            Ok(file) => std::io::BufWriter::new(file),
+            Err(_) => std::io::stdout(),
+        }, //FIXME: !!
         None => std::io::stdout(),
-    }; //FIXME: do shell specific stuff
+    }; //FIXME: do shell specific stuff*/
        //let mut path = std::io::stdout();
 
-    app.gen_completions_to("selbstlernportal-crawler", shell, &mut path);
+    let mut path = BufWriter::new(match args.value_of("out") {
+        Some(x) => Box::new(File::create(&std::path::Path::new(x)).unwrap_or_else(|err| {
+            eprintln!("Error opening file: {}", err);
+            std::process::exit(1);
+        })) as Box<Write>,
+        None => Box::new(std::io::stdout()) as Box<Write>,
+        
+    });
+
+    app.gen_completions_to("poke_escape_server", shell, &mut path);
 }
 
 /// prints the license to stdout
@@ -180,3 +196,4 @@ PokeEscape-server  Copyright (C) 2019  Finn Behrens,
     under certain conditions;",
     )
 }
+ 
