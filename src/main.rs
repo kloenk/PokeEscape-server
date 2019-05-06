@@ -164,15 +164,6 @@ fn completion(args: &clap::ArgMatches, app: &mut App) {
     use std::io::BufWriter;
     use std::fs::File;
 
-    /*let mut path: std::io::Write = match args.value_of("out") {
-        Some(path) => match std::fs::File::create(path) {
-            Ok(file) => std::io::BufWriter::new(file),
-            Err(_) => std::io::stdout(),
-        }, //FIXME: !!
-        None => std::io::stdout(),
-    }; //FIXME: do shell specific stuff*/
-       //let mut path = std::io::stdout();
-
     let mut path = BufWriter::new(match args.value_of("out") {
         Some(x) => Box::new(File::create(&std::path::Path::new(x)).unwrap_or_else(|err| {
             eprintln!("Error opening file: {}", err);
