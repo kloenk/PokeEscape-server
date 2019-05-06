@@ -528,26 +528,29 @@
 <span id="528">528</span>
 <span id="529">529</span>
 <span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">colored</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">semver</span>::<span class="ident">Version</span>;
+<span class="kw">use</span> <span class="ident">serde_derive</span>::<span class="ident">Serialize</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">HashMap</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fs</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">str</span>::<span class="ident">FromStr</span>;
 <span class="kw">use</span> <span class="ident">toml</span>::<span class="ident">Value</span>;
-<span class="kw">use</span> <span class="ident">serde_derive</span>::<span class="ident">Serialize</span>;
 
 <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">error</span>::<span class="prelude-ty">Result</span>;
 
-<span class="doccomment">/// defines the widht of the map </span>
-<span class="doccomment">/// </span>
+<span class="doccomment">/// defines the widht of the map</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// creates warning and 0 an the right end if map in file is smaller,</span>
 <span class="doccomment">/// or crops the right side if map is bigger</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">WIDTH</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">28</span>;
-
 
 <span class="doccomment">/// struct holding all informations of the toml file</span>
 <span class="comment">// this is not a deserialisable struct, so every map can live at top level</span>
@@ -561,7 +564,7 @@
 
 <span class="kw">impl</span> <span class="ident">MapPlaces</span> {
     <span class="doccomment">/// Loads toml file and deserialize it into `MapPlaces`</span>
-    <span class="doccomment">/// </span>
+    <span class="doccomment">///</span>
     <span class="doccomment">/// # Arguments</span>
     <span class="doccomment">/// - `file` -&gt; give the path of the toml file to load</span>
     <span class="doccomment">/// - `verbose` -&gt; if set true shows status of loading</span>
@@ -570,7 +573,7 @@
             <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;Loading {} from {}&quot;</span>, <span class="string">&quot;Maps&quot;</span>.<span class="ident">green</span>(), <span class="ident">file</span>.<span class="ident">blue</span>());
         }
 
-        <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">fs</span>::<span class="ident">read_to_string</span>(<span class="ident">file</span>)<span class="question-mark">?</span>;   <span class="comment">//FIXME: testing</span>
+        <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">fs</span>::<span class="ident">read_to_string</span>(<span class="ident">file</span>)<span class="question-mark">?</span>; <span class="comment">//FIXME: testing</span>
         <span class="kw">let</span> <span class="ident">content</span>: <span class="ident">Value</span> <span class="op">=</span> <span class="ident">toml</span>::<span class="ident">from_str</span>(<span class="ident">file</span>.<span class="ident">as_str</span>())<span class="question-mark">?</span>;
 
         <span class="kw">if</span> <span class="ident">content</span>.<span class="ident">get</span>(<span class="string">&quot;Maps&quot;</span>) <span class="op">==</span> <span class="prelude-val">None</span> {
@@ -608,20 +611,22 @@
 
     <span class="doccomment">/// returns the pointer to a specific map</span>
     <span class="kw">fn</span> <span class="ident">get_map</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="ident">String</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Map</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">p_maps</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>) {  <span class="comment">// FIXME foo</span>
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">p_maps</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>) {
+            <span class="comment">// FIXME foo</span>
             <span class="prelude-val">Some</span>(<span class="ident">data</span>) <span class="op">=&gt;</span> <span class="ident">data</span>.<span class="ident">load_map</span>(),
-            <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">new_field_not_exists</span>(<span class="ident">name</span>))
+            <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">new_field_not_exists</span>(<span class="ident">name</span>)),
         }
     }
 
     <span class="doccomment">/// return the Map with the given Name</span>
-    <span class="doccomment">/// </span>
+    <span class="doccomment">///</span>
     <span class="doccomment">/// This function take a name as argument and returns the loaded Map</span>
     <span class="doccomment">/// associated with the given name</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Map</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">p_maps</span>.<span class="ident">get</span>(<span class="ident">name</span>) {   <span class="comment">// FIXME: version foo for random feature</span>
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">p_maps</span>.<span class="ident">get</span>(<span class="ident">name</span>) {
+            <span class="comment">// FIXME: version foo for random feature</span>
             <span class="prelude-val">Some</span>(<span class="ident">data</span>) <span class="op">=&gt;</span> <span class="ident">data</span>.<span class="ident">load_map</span>(),
-            <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">new_field_not_exists</span>(<span class="ident">name</span>.<span class="ident">to_string</span>()))
+            <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">new_field_not_exists</span>(<span class="ident">name</span>.<span class="ident">to_string</span>())),
         }
     }
 
@@ -640,8 +645,8 @@
 }
 
 <span class="doccomment">/// Map holds a map ready to send to a client</span>
-<span class="doccomment">/// </span>
-<span class="doccomment">/// # Meanings </span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Meanings</span>
 <span class="doccomment">/// | Number | Block           | Variant                 |</span>
 <span class="doccomment">/// |--------|-----------------|-------------------------|</span>
 <span class="doccomment">/// | 0      | None            |                         |</span>
@@ -672,7 +677,6 @@
 
     <span class="doccomment">/// get size of map</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">String</span> {
-
         <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}x{}&quot;</span>, <span class="ident">WIDTH</span>, <span class="self">self</span>.<span class="ident">p_map</span>.<span class="ident">len</span>())
     }
 
@@ -699,7 +703,7 @@
                 }
                 <span class="ident">ret</span>
             }
-            <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="string">&quot;&quot;</span>.<span class="ident">to_string</span>()
+            <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="string">&quot;&quot;</span>.<span class="ident">to_string</span>(),
         }
     }
 }
@@ -710,7 +714,7 @@
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-&gt;</span> <span class="ident">std</span>::<span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
         <span class="kw">let</span> <span class="ident">json</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">serde_json</span>::<span class="ident">to_string</span>(<span class="self">self</span>) {
             <span class="prelude-val">Ok</span>(<span class="ident">json</span>) <span class="op">=&gt;</span> <span class="ident">json</span>,
-            <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{{\&quot;status\&quot;: 100, \&quot;err\&quot;: \&quot;{}\&quot;}}&quot;</span>, <span class="ident">err</span>.<span class="ident">to_string</span>()), 
+            <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=&gt;</span> <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{{\&quot;status\&quot;: 100, \&quot;err\&quot;: \&quot;{}\&quot;}}&quot;</span>, <span class="ident">err</span>.<span class="ident">to_string</span>()),
         };
         <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">json</span>)
     }
@@ -818,11 +822,11 @@
     }
 
     <span class="doccomment">/// reads one map from the toml and and returns the Map</span>
-    <span class="doccomment">/// </span>
+    <span class="doccomment">///</span>
     <span class="doccomment">/// # Parameters</span>
     <span class="doccomment">/// `toml` - The toml Value of the given Map</span>
     <span class="doccomment">/// `name` - Name of the map to read</span>
-    <span class="doccomment">/// `verbose` - set to true for debug output </span>
+    <span class="doccomment">/// `verbose` - set to true for debug output</span>
     <span class="kw">fn</span> <span class="ident">from_conf_one</span>(<span class="ident">toml</span>: <span class="kw-2">&amp;</span><span class="ident">toml</span>::<span class="ident">Value</span>, <span class="ident">name</span>: <span class="ident">String</span>, <span class="ident">verbose</span>: <span class="ident">bool</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">toml</span>.<span class="ident">get</span>(<span class="string">&quot;path&quot;</span>) {
             <span class="prelude-val">Some</span>(<span class="ident">path</span>) <span class="op">=&gt;</span> <span class="ident">path</span>,
@@ -850,7 +854,8 @@
             <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="string">&quot;JSON&quot;</span>,
         };
 
-        <span class="kw">let</span> <span class="ident">author</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">toml</span>.<span class="ident">get</span>(<span class="string">&quot;author&quot;</span>) {    <span class="comment">// read author from toml file</span>
+        <span class="kw">let</span> <span class="ident">author</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">toml</span>.<span class="ident">get</span>(<span class="string">&quot;author&quot;</span>) {
+            <span class="comment">// read author from toml file</span>
             <span class="prelude-val">Some</span>(<span class="ident">a</span>) <span class="op">=&gt;</span> {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nan</span>: <span class="ident">bool</span> <span class="op">=</span> <span class="bool-val">false</span>;
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
@@ -860,7 +865,7 @@
                         <span class="prelude-val">None</span> <span class="op">=&gt;</span> {
                             <span class="ident">nan</span> <span class="op">=</span> <span class="bool-val">true</span>;
                             <span class="string">&quot;NaN&quot;</span>.<span class="ident">to_string</span>()
-                        },
+                        }
                     };
                     <span class="ident">ret</span>.<span class="ident">push</span>(<span class="ident">b</span>);
                 } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">a</span>.<span class="ident">is_array</span>() {
@@ -870,7 +875,7 @@
                             <span class="prelude-val">None</span> <span class="op">=&gt;</span> {
                                 <span class="ident">nan</span> <span class="op">=</span> <span class="bool-val">true</span>;
                                 <span class="string">&quot;NaN&quot;</span>.<span class="ident">to_string</span>()
-                            },
+                            }
                         };
                         <span class="ident">ret</span>.<span class="ident">push</span>(<span class="ident">b</span>);
                     }
@@ -879,9 +884,9 @@
                 }
                 <span class="kw">match</span> <span class="ident">nan</span> {
                     <span class="bool-val">true</span> <span class="op">=&gt;</span> <span class="prelude-val">None</span>,
-                    <span class="bool-val">false</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">ret</span>)
+                    <span class="bool-val">false</span> <span class="op">=&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">ret</span>),
                 }
-            },
+            }
             <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="prelude-val">None</span>,
         };
 
@@ -893,13 +898,7 @@
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">new</span>(<span class="kw">super</span>::<span class="ident">error</span>::<span class="ident">ErrorKind</span>::<span class="ident">FormatNotSupported</span>));
         }
 
-        <span class="prelude-val">Ok</span>(<span class="self">Self</span>::<span class="ident">new</span>(
-            <span class="ident">name</span>,
-            <span class="ident">file</span>,
-            <span class="ident">version</span>,
-            <span class="ident">format</span>,
-            <span class="ident">author</span>,
-            <span class="ident">verbose</span>))
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>::<span class="ident">new</span>(<span class="ident">name</span>, <span class="ident">file</span>, <span class="ident">version</span>, <span class="ident">format</span>, <span class="ident">author</span>, <span class="ident">verbose</span>))
     }
 
     <span class="doccomment">/// returns the name of the Map it hold information about</span>
@@ -944,23 +943,27 @@
     <span class="doccomment">/// load and return a map</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_map</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Map</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">p_verbose</span> {
-            <span class="macro">print</span><span class="macro">!</span>(<span class="string">&quot;Loading {} from {}...  &quot;</span>, <span class="self">self</span>.<span class="ident">p_name</span>.<span class="ident">green</span>(), <span class="self">self</span>.<span class="ident">p_file</span>.<span class="ident">blue</span>());
+            <span class="macro">print</span><span class="macro">!</span>(
+                <span class="string">&quot;Loading {} from {}...  &quot;</span>,
+                <span class="self">self</span>.<span class="ident">p_name</span>.<span class="ident">green</span>(),
+                <span class="self">self</span>.<span class="ident">p_file</span>.<span class="ident">blue</span>()
+            );
         }
 
         <span class="comment">// read json</span>
         <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">fs</span>::<span class="ident">read_to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">p_file</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">content</span>: <span class="ident">Value</span> <span class="op">=</span> <span class="ident">serde_json</span>::<span class="ident">from_str</span>(<span class="ident">file</span>.<span class="ident">as_str</span>())<span class="question-mark">?</span>;
 
-
         <span class="comment">// get name</span>
         <span class="kw">let</span> <span class="ident">name</span>: <span class="ident">String</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">content</span>.<span class="ident">get</span>(<span class="string">&quot;name&quot;</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=&gt;</span> { <span class="kw">match</span> <span class="ident">name</span>.<span class="ident">as_str</span>() {
+            <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=&gt;</span> <span class="kw">match</span> <span class="ident">name</span>.<span class="ident">as_str</span>() {
                 <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=&gt;</span> <span class="ident">name</span>.<span class="ident">to_string</span>(),
                 <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">new_field_not_exists</span>(<span class="string">&quot;name&quot;</span>.<span class="ident">to_string</span>())),
-            }},
+            },
             <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">new_field_not_exists</span>(<span class="string">&quot;name&quot;</span>.<span class="ident">to_string</span>())),
         };
-        <span class="kw">if</span> <span class="ident">name</span> <span class="op">!=</span> <span class="self">self</span>.<span class="ident">p_name</span> {    <span class="comment">// check name</span>
+        <span class="kw">if</span> <span class="ident">name</span> <span class="op">!=</span> <span class="self">self</span>.<span class="ident">p_name</span> {
+            <span class="comment">// check name</span>
             <span class="macro">eprintln</span><span class="macro">!</span>(<span class="string">&quot;Map name {} differs from name {}&quot;</span>, <span class="ident">name</span>, <span class="self">self</span>.<span class="ident">p_name</span>);
         }
 
@@ -973,17 +976,20 @@
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">fe</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
                 <span class="kw">for</span> <span class="ident">v</span> <span class="kw">in</span> <span class="ident">f</span>.<span class="ident">as_array</span>().<span class="ident">unwrap</span>() {
                     <span class="kw">if</span> <span class="op">!</span><span class="ident">v</span>.<span class="ident">is_str</span>() {
-                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">new_field_not_exists</span>(<span class="string">&quot;features is not string&quot;</span>.<span class="ident">to_string</span>()))
+                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">new_field_not_exists</span>(
+                            <span class="string">&quot;features is not string&quot;</span>.<span class="ident">to_string</span>(),
+                        ));
                     }
                     <span class="ident">fe</span>.<span class="ident">push</span>(<span class="ident">v</span>.<span class="ident">as_str</span>().<span class="ident">unwrap</span>().<span class="ident">to_string</span>());
                 }
-                <span class="ident">features</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">fe</span>);    <span class="comment">// attach to fe</span>
+                <span class="ident">features</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">fe</span>); <span class="comment">// attach to fe</span>
             } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">f</span>.<span class="ident">is_str</span>() {
-                <span class="ident">features</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="macro">vec</span><span class="macro">!</span>(<span class="ident">f</span>.<span class="ident">as_str</span>().<span class="ident">unwrap</span>().<span class="ident">to_string</span>()));
+                <span class="ident">features</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="ident">f</span>.<span class="ident">as_str</span>().<span class="ident">unwrap</span>().<span class="ident">to_string</span>()]);
             }
         }
-        <span class="ident">drop</span>(<span class="ident">f</span>);    <span class="comment">// remove f</span>
-        <span class="ident">features</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">features</span> { <span class="comment">// check if it only says none</span>
+        <span class="ident">drop</span>(<span class="ident">f</span>); <span class="comment">// remove f</span>
+        <span class="ident">features</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">features</span> {
+            <span class="comment">// check if it only says none</span>
             <span class="prelude-val">Some</span>(<span class="ident">f</span>) <span class="op">=&gt;</span> {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;&gt;</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">f</span>.<span class="ident">clone</span>());
                 <span class="kw">if</span> <span class="ident">f</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> {
@@ -992,10 +998,9 @@
                     }
                 }
                 <span class="ident">ret</span>
-            },
+            }
             <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="prelude-val">None</span>,
         };
-
 
         <span class="comment">// load map</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">map</span>: <span class="ident">Vec</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="ident">WIDTH</span>]<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">new</span>();
@@ -1013,7 +1018,7 @@
                 <span class="prelude-val">Some</span>(<span class="ident">j</span>) <span class="op">=&gt;</span> <span class="ident">j</span>,
                 <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">new_field_not_exists</span>(<span class="string">&quot;map&quot;</span>.<span class="ident">to_string</span>())),
             };
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">user_warned</span>{
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">user_warned</span> {
                 <span class="kw">if</span> <span class="ident">v</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">WIDTH</span> {
                     <span class="macro">eprintln</span><span class="macro">!</span>(<span class="string">&quot;\nmap smaller than {} collums&quot;</span>, <span class="ident">WIDTH</span>);
                     <span class="ident">user_warned</span> <span class="op">=</span> <span class="bool-val">true</span>;
@@ -1030,27 +1035,30 @@
                 };
                 <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">b</span> {
                     <span class="prelude-val">Some</span>(<span class="ident">b</span>) <span class="op">=&gt;</span> <span class="ident">b</span> <span class="kw">as</span> <span class="ident">u8</span>,
-                    <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="number">1</span> <span class="kw">as</span> <span class="ident">u8</span>,  <span class="comment">// return solid block </span>
+                    <span class="prelude-val">None</span> <span class="op">=&gt;</span> <span class="number">1</span> <span class="kw">as</span> <span class="ident">u8</span>, <span class="comment">// return solid block</span>
                 };
                 <span class="ident">row</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">b</span>;
             }
             <span class="ident">map</span>.<span class="ident">push</span>(<span class="ident">row</span>);
         }
-        <span class="ident">drop</span>(<span class="ident">j_map</span>);    <span class="comment">// remove j_map</span>
+        <span class="ident">drop</span>(<span class="ident">j_map</span>); <span class="comment">// remove j_map</span>
 
-        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">Map</span>{
-                <span class="ident">p_name</span>: <span class="ident">name</span>,
-                <span class="ident">p_features</span>: <span class="ident">features</span>,
-                <span class="ident">p_map</span>: <span class="ident">map</span>,
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">Map</span> {
+            <span class="ident">p_name</span>: <span class="ident">name</span>,
+            <span class="ident">p_features</span>: <span class="ident">features</span>,
+            <span class="ident">p_map</span>: <span class="ident">map</span>,
         };
 
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">p_verbose</span> {
-            <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;[{}]: Loaded Map {} with size {}&quot;</span>, <span class="string">&quot;Ok&quot;</span>.<span class="ident">green</span>(), <span class="ident">ret</span>.<span class="ident">p_name</span>.<span class="ident">blue</span>(), <span class="ident">ret</span>.<span class="ident">size</span>().<span class="ident">yellow</span>())
+            <span class="macro">println</span><span class="macro">!</span>(
+                <span class="string">&quot;[{}]: Loaded Map {} with size {}&quot;</span>,
+                <span class="string">&quot;Ok&quot;</span>.<span class="ident">green</span>(),
+                <span class="ident">ret</span>.<span class="ident">p_name</span>.<span class="ident">blue</span>(),
+                <span class="ident">ret</span>.<span class="ident">size</span>().<span class="ident">yellow</span>()
+            )
         }
 
-        <span class="prelude-val">Ok</span>(
-            <span class="ident">ret</span>
-        )
+        <span class="prelude-val">Ok</span>(<span class="ident">ret</span>)
     }
 }
 

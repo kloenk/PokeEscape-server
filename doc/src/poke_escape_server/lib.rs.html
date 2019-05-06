@@ -117,33 +117,15 @@
 <span id="117">117</span>
 <span id="118">118</span>
 <span id="119">119</span>
-<span id="120">120</span>
-<span id="121">121</span>
-<span id="122">122</span>
-<span id="123">123</span>
-<span id="124">124</span>
-<span id="125">125</span>
-<span id="126">126</span>
-<span id="127">127</span>
-<span id="128">128</span>
-<span id="129">129</span>
-<span id="130">130</span>
-<span id="131">131</span>
-<span id="132">132</span>
-<span id="133">133</span>
-<span id="134">134</span>
-<span id="135">135</span>
-<span id="136">136</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! # Poké Escape server</span>
 <span class="doccomment">//! PokéEscape is a game created in School as a group Project.</span>
-<span class="doccomment">//! This project contains the source code for the server, talking </span>
+<span class="doccomment">//! This project contains the source code for the server, talking</span>
 <span class="doccomment">//! with the client written in GreenFoot (java)</span>
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_docs</span>)]</span>
 <span class="kw">use</span> <span class="ident">colored</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">net</span>::<span class="ident">TcpListener</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">process</span>;
-<span class="kw">use</span> <span class="ident">structopt</span>::<span class="ident">StructOpt</span>;
 
 <span class="doccomment">/// general tcp module for talking with the client and negotiating the</span>
 <span class="doccomment">/// protocoll to use</span>
@@ -159,45 +141,39 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">map</span>;
 
 <span class="doccomment">/// struct deriving cli parsing. It also implements the run function, serving the main function</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">StructOpt</span>, <span class="ident">Debug</span>)]</span>
-<span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">raw</span>(<span class="ident">setting</span> <span class="op">=</span> <span class="string">&quot;structopt::clap::AppSettings::ColoredHelp&quot;</span>))]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Config</span> {
     <span class="doccomment">/// configures the port to listen on</span>
-    <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">short</span> <span class="op">=</span> <span class="string">&quot;p&quot;</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;port&quot;</span>, <span class="ident">default_value</span> <span class="op">=</span> <span class="string">&quot;1996&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">port</span>: <span class="ident">u16</span>,
 
     <span class="doccomment">/// configures the interface (ip) to listen on</span>
-    <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">short</span> <span class="op">=</span> <span class="string">&quot;H&quot;</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;host&quot;</span>, <span class="ident">default_value</span> <span class="op">=</span> <span class="string">&quot;127.0.0.1&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">host</span>: <span class="ident">String</span>,
 
     <span class="doccomment">/// enables verbose mode</span>
-    <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">short</span> <span class="op">=</span> <span class="string">&quot;v&quot;</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;verbose&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">verbose</span>: <span class="ident">bool</span>,
 
     <span class="doccomment">/// defines the number of thread in ThreadPool to use</span>
-    <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">short</span> <span class="op">=</span> <span class="string">&quot;t&quot;</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;threads&quot;</span>, <span class="ident">default_value</span> <span class="op">=</span> <span class="string">&quot;8&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">threads</span>: <span class="ident">usize</span>,
 
     <span class="doccomment">/// sets the config file (toml) to load the maps</span>
-    <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">short</span> <span class="op">=</span> <span class="string">&quot;c&quot;</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;config&quot;</span>, <span class="ident">default_value</span> <span class="op">=</span> <span class="string">&quot;./config.toml&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">config</span>: <span class="ident">String</span>,
-
-    <span class="doccomment">/// show the licens under which this software is licensed</span>
-    <span class="attribute">#[<span class="ident">structopt</span>(<span class="ident">long</span><span class="op">=</span><span class="string">&quot;license&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">license</span>: <span class="ident">bool</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Config</span> {
+    <span class="doccomment">/// new creates a struct with default values</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">port</span>: <span class="number">1996</span>,
+            <span class="ident">host</span>: <span class="string">&quot;127.0.0.1&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">verbose</span>: <span class="bool-val">false</span>,
+            <span class="ident">threads</span>: <span class="number">8</span>,
+            <span class="ident">config</span>: <span class="string">&quot;./config.toml&quot;</span>.<span class="ident">to_string</span>(),
+        }
+    }
     <span class="doccomment">/// run function serving as the main function of the librarie.AsMut</span>
-    <span class="doccomment">/// </span>
+    <span class="doccomment">///</span>
     <span class="doccomment">/// The function takes the config from itself, and serves the server as descriped</span>
     <span class="doccomment">/// in this config.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="comment">// check if license is set to true</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">license</span> {
-            <span class="self">Self</span>::<span class="ident">show_license</span>();
-            <span class="ident">std</span>::<span class="ident">process</span>::<span class="ident">exit</span>(<span class="number">0</span>);  <span class="comment">// exit programm</span>
-        }
         <span class="macro">println</span><span class="macro">!</span>(
             <span class="string">&quot;Starting {} server on port: {}&quot;</span>,
             <span class="string">&quot;PokeEscape&quot;</span>.<span class="ident">green</span>(),
@@ -219,7 +195,7 @@
                 <span class="macro">eprintln</span><span class="macro">!</span>(<span class="string">&quot;Error loading maps: {}&quot;</span>, <span class="ident">err</span>.<span class="ident">to_string</span>().<span class="ident">red</span>());
                 <span class="ident">std</span>::<span class="ident">process</span>::<span class="ident">exit</span>(<span class="number">20</span>);
             }
-        };        
+        };
 
         <span class="comment">// create ThreadPool</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">thread_pool</span> <span class="op">=</span> <span class="ident">threads</span>::<span class="ident">ThreadPool</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">threads</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> {
@@ -259,16 +235,6 @@
                 })
                 .<span class="ident">unwrap</span>(); <span class="comment">// FIXME: unwrap</span>
         }
-    }
-
-    <span class="doccomment">/// prints the license to stdout</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">show_license</span>() {
-        <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;This software is licensed under GPLv3+
-PokeEscape-server  Copyright (C) 2019  Finn Behrens,
-    Janina Lanz, Zoe Horsten, Malissa Schultke, Enna Freihoff
-    This program comes with ABSOLUTELY NO WARRANTY;
-    This is free software, and you are welcome to redistribute it
-    under certain conditions;&quot;</span>, )
     }
 }
 </pre></div>
