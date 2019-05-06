@@ -248,7 +248,10 @@ mod error_kind_error_string {
     #[test]
     fn version_not_parsable() {
         let kind = ErrorKind::VersionNotParsable("test".to_string());
-        assert_eq!(kind.error_string(), String::from("VersionNotParsable(test)"));
+        assert_eq!(
+            kind.error_string(),
+            String::from("VersionNotParsable(test)")
+        );
     }
 
     #[test]
@@ -263,7 +266,10 @@ mod error_kind_error_string {
         assert_eq!(kind.error_string(), String::from("PoolSendError(Job)"));
 
         let kind = ErrorKind::PoolSendError(false);
-        assert_eq!(kind.error_string(), String::from("PoolSendError(Terminate)"));
+        assert_eq!(
+            kind.error_string(),
+            String::from("PoolSendError(Terminate)")
+        );
     }
 
     #[test]

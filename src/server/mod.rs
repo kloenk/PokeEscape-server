@@ -13,7 +13,8 @@ pub mod http;
 
 /// This function negotiates the protocoll to use between the client and the Server
 /// it calles the function of the protocoll, uses &TcpStream and a buffer as arguments
-pub fn negotiate(mut conf: Job) -> Result<()> { // FIXME: return error
+pub fn negotiate(mut conf: Job) -> Result<()> {
+    // FIXME: return error
     let mut reader = BufReader::new(conf.stream.try_clone()?);
     let mut line = String::new();
     reader.read_line(&mut line)?;
@@ -42,8 +43,12 @@ pub fn handle_pokemon_client(mut stream: TcpStream) -> Result<TcpStream> {
     loop {
         let mut line = String::new();
         match reader.read_line(&mut line) {
-            Err(_err) => return Err(Error::new_field_not_exists("fix error handling".to_string())), //FIXME: return error?
-            Ok(_) => (),                 // would return usize with number read bytes
+            Err(_err) => {
+                return Err(Error::new_field_not_exists(
+                    "fix error handling".to_string(),
+                ))
+            } //FIXME: return error?
+            Ok(_) => (), // would return usize with number read bytes
         };
 
         stream.write(line.as_bytes())?;

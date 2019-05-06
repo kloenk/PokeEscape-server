@@ -7,7 +7,7 @@ authors = ["Finn Behrens <me@kloenk.de>"]
 edition = "2018"
 
 [dependencies]
-structopt = "0.2.15"
+clap = {version = "2.33.0", features = ["color"]}
 colored = "1.8.0"
 semver = "0.9.0"
 serde_json = "1.0.39"

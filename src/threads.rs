@@ -171,7 +171,6 @@ impl Drop for ThreadPool {
     }
 }
 
-
 /// implement function to convert sendError to Error
 impl std::convert::From<std::sync::mpsc::SendError<super::threads::Message>> for Error {
     fn from(err: std::sync::mpsc::SendError<super::threads::Message>) -> Self {
@@ -181,7 +180,6 @@ impl std::convert::From<std::sync::mpsc::SendError<super::threads::Message>> for
         }
     }
 }
-
 
 /// enum to hold either a Job or a Terminate signal for the worker thread
 enum Message {
