@@ -6,6 +6,7 @@
 use colored::*;
 use std::net::TcpListener;
 use std::process;
+use std::sync::mpsc;
 
 /// general tcp module for talking with the client and negotiating the
 /// protocoll to use
@@ -101,12 +102,19 @@ impl Config {
         // open socket
         let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap(); //FIXME: !!!
 
+        // create channel
+        let (tx, rx) = mpsc::channel();
+
+        // create handle thread
+        server::server_client(rx);
+
         // handle incomming streams
         for stream in listener.incoming() {
             let stream = stream.unwrap(); // FIXME: unwrap
             let conf = server::Job {
                 stream,
                 verbose: self.verbose,
+                sender: mpsc::Sender::clone(&tx),
             };
 
             // execute Job in ThreadPool

@@ -2,6 +2,8 @@ use colored::*;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::net::TcpStream;
+use std::sync::{mpsc};
+use semver::{Version, VersionReq};
 
 use super::error::Error;
 
@@ -24,14 +26,28 @@ pub fn negotiate(mut conf: Job) -> Result<()> {
     }
 
     if line.starts_with("POKE-ESCAPE_") {
-        // run PokeEscape server
-        eprintln!("fix POKE-ESCAPE-CLIENT");
         conf.stream
             .write(format!("POKE-ESCAPE-SERVER_{}\n", env!("CARGO_PKG_VERSION")).as_bytes())?;
+        // parse version of client
+        let clientv = Version::parse(&line[12..])?;
+
+        if conf.verbose {
+            println!("Client with version {} connected", clientv);
+        }
+
+        // compare version of client
+        let requirment = VersionReq::parse("<= 0.1.0").unwrap();
+
+        if requirment.matches(&clientv) {
+            println!("handle");
+        } else {
+            conf.stream.write(b"Protocol mismatch.\n")?;
+        }
+
     } else if line.contains("HTTP/1.1") {
         http::handle_client(&mut conf.stream, reader)?;
     } else {
-        conf.stream.write(b"Protocol mismatch.")?;
+        conf.stream.write(b"Protocol mismatch.\n")?;
     }
     conf.stream.flush()?;
     Ok(()) // return type
@@ -71,4 +87,35 @@ pub struct Job {
 
     /// verbose state
     pub verbose: bool,
+
+    /// 
+    pub sender: mpsc::Sender<Message>,
+
+}
+
+
+
+/// enum for different jobs for a client thread
+pub enum Message {
+    /// Option to close the thread
+    CLOSE,
+
+    /// Command to identify client to server group
+    /// 0: channel to talk to client
+    /// 1: id of client
+    IDENTIFY(mpsc::Sender<Message>, String),
+}
+
+
+/// handle interclient communication
+pub fn server_client(rx: mpsc::Receiver<Message>) {
+    std::thread::spawn(move || {
+        for recv in rx {
+            match recv {
+                Message::CLOSE => println!("Send close"),
+                Message::IDENTIFY(_, _) => println!("send identify"),
+                _ => println!("foo"),
+            };
+        }
+    });
 }
