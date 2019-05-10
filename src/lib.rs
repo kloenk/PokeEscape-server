@@ -69,6 +69,7 @@ impl Config {
         }
 
         // load maps
+        #[allow(unused_variables)]
         let maps = match map::MapPlaces::new(&self.config, self.verbose) {
             Ok(maps) => maps,
             Err(err) => {

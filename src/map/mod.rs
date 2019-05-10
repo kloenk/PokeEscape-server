@@ -75,6 +75,7 @@ impl MapPlaces {
     }
 
     /// returns the pointer to a specific map
+    #[allow(dead_code)]
     fn get_map(&self, name: String) -> Result<Map> {
         match self.p_maps.get(&name) {
             // FIXME foo
@@ -199,6 +200,7 @@ struct MapInfo {
     p_version: Version,
 
     /// format of the given map file
+    #[allow(dead_code)]
     p_format: MapFormat,
 
     /// author of the map
@@ -377,12 +379,14 @@ impl MapInfo {
     }
 
     /// set the map into verbose mode
+    #[allow(dead_code)]
     pub fn verbose(&mut self) -> &mut Self {
         self.p_verbose = true;
         self
     }
 
     /// returns the verbose state of the Map
+    #[allow(dead_code)]
     pub fn is_verbose(&self) -> bool {
         self.p_verbose
     }
@@ -401,6 +405,7 @@ impl MapInfo {
     }
 
     /// get_map returns a finish map object ready to be send
+    #[allow(dead_code)]
     pub fn get_map(&self) -> Result<Map> {
         Err(Error::new_field_not_exists("code".to_string()))
     }
@@ -528,7 +533,7 @@ impl MapInfo {
 }
 
 /// map format is a enum of possible loader elements for a map file
-enum MapFormat {
+pub enum MapFormat {
     /// JSON as the javascript object notation
     JSON,
 }
