@@ -4,6 +4,7 @@ use std::io::BufReader;
 use std::net::TcpStream;
 use std::sync::{mpsc};
 use semver::{Version, VersionReq};
+use std::collections::HashMap;
 
 use super::error::Error;
 
@@ -39,7 +40,7 @@ pub fn negotiate(mut conf: Job) -> Result<()> {
         let requirment = VersionReq::parse("<= 0.1.0").unwrap();
 
         if requirment.matches(&clientv) {
-            println!("handle");
+            handle_pokemon_client(conf.stream.try_clone()?, conf.sender);
         } else {
             conf.stream.write(b"Protocol mismatch.\n")?;
         }
@@ -54,10 +55,16 @@ pub fn negotiate(mut conf: Job) -> Result<()> {
 }
 
 /// starts the connection to the client
-pub fn handle_pokemon_client(mut stream: TcpStream) -> Result<TcpStream> {
+pub fn handle_pokemon_client(mut stream: TcpStream, mut tx: mpsc::Sender<Message>) -> Result<TcpStream> {
     let mut reader = BufReader::new(stream.try_clone().unwrap()); //FIXME: unwrap
+
+    // create channel
+    let (txOwn, rx) = mpsc::channel();
+
+    // create empty buffer for recieved line
+    let mut line = String::new();
+
     loop {
-        let mut line = String::new();
         match reader.read_line(&mut line) {
             Err(_err) => {
                 return Err(Error::new_field_not_exists(
@@ -70,10 +77,16 @@ pub fn handle_pokemon_client(mut stream: TcpStream) -> Result<TcpStream> {
         stream.write(line.as_bytes())?;
         stream.flush()?;
 
+        //line.trim()
+
         if line.to_lowercase().starts_with("quit") {
             // send quit
             stream.write(b"Bye")?;
+            tx.send(Message::CLOSE).unwrap();
             break; // exit loop
+        } else if line.to_lowercase().starts_with("identify") {
+            let id =  line[9..].to_string();
+            tx.send(Message::IDENTIFY(Ident::new(id, txOwn))).unwrap();
         }
     }
     stream.flush()?;
@@ -88,9 +101,28 @@ pub struct Job {
     /// verbose state
     pub verbose: bool,
 
-    /// 
+    /// channel to communicate with scheduler
     pub sender: mpsc::Sender<Message>,
 
+}
+
+/// struct for the identification of the client
+pub struct Ident {
+    /// id of the client (generated as UUID)
+    pub id: String,
+    
+    // channel to send messages to
+    pub tx: mpsc::Sender<Message>,
+}
+
+impl Ident {
+    /// create a new instance of Ident
+    pub fn new(id: String, tx: mpsc::Sender<Message>) -> Self {
+        Ident {
+            id,
+            tx,
+        }
+    }
 }
 
 
@@ -101,19 +133,45 @@ pub enum Message {
     CLOSE,
 
     /// Command to identify client to server group
-    /// 0: channel to talk to client
-    /// 1: id of client
-    IDENTIFY(mpsc::Sender<Message>, String),
+    /// ident struct with the content
+    IDENTIFY(Ident),
+}
+
+/// struct used in hashmap of the coordinator
+struct Client {
+    /// room of the client
+    pub room: Option<String>,
+
+    /// sender for the client
+    pub tx: mpsc::Sender<Message>,
+}
+
+impl Client {
+    /// create a new instance of the client
+    pub fn new(tx: mpsc::Sender<Message>) -> Self {
+        Self {
+            room: None,
+            tx,
+        }
+    }
 }
 
 
 /// handle interclient communication
 pub fn server_client(rx: mpsc::Receiver<Message>) {
     std::thread::spawn(move || {
+        // hashmap containing the induvidual clients
+        let mut clients = HashMap::new();
+
+        // hashmap containing the group of clients
+        //let mut groups = HashMap::new();
         for recv in rx {
             match recv {
                 Message::CLOSE => println!("Send close"),
-                Message::IDENTIFY(_, _) => println!("send identify"),
+                Message::IDENTIFY(ident) => {
+                    println!("send identify from {}", ident.id);
+                    clients.insert(ident.id, Client::new(ident.tx));
+                },
                 _ => println!("foo"),
             };
         }
