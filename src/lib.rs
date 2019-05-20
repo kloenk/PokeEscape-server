@@ -32,6 +32,9 @@ pub struct Config {
     /// enables verbose mode
     pub verbose: bool,
 
+    /// verbosity level
+    pub verbosity_level: u8,
+
     /// defines the number of thread in ThreadPool to use
     pub threads: usize,
 
@@ -46,6 +49,7 @@ impl Config {
             port: 1996,
             host: "127.0.0.1".to_string(),
             verbose: false,
+            verbosity_level: 0,
             threads: 8,
             config: "./config.toml".to_string(),
         }
@@ -106,7 +110,7 @@ impl Config {
         let (tx, rx) = mpsc::channel();
 
         // create handle thread
-        server::server_client(rx);
+        server::server_client(rx, self.verbosity_level); // FIXME: verbosity level
 
         // handle incomming streams
         for stream in listener.incoming() {

@@ -108,6 +108,7 @@ fn main() {
         0 => config.verbose = false,
         1 | _ => config.verbose = true,
     };
+    config.verbosity_level = matches.occurrences_of("verbose") as u8;
 
     if let Some(port) = matches.value_of("port") {
         if let Ok(port) = port.parse::<u16>() {
