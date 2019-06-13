@@ -65,12 +65,13 @@ pub fn handle_pokemon_client(
     let mut txOwn = Some(txOwn); // encase in Option<T> so it can move out of scope in a controlled way
     let mut isIdentified = false; // set to true when it is identified to master thread
 
-    // create empty buffer for recieved line
-    let mut line = String::new();
 
     let mut message = Message::empty();
 
     loop {
+        // create empty buffer for recieved line
+        let mut line = String::new();
+
         match reader.read_line(&mut line) {
             Err(_err) => {
                 return Err(Error::new_field_not_exists(
@@ -80,14 +81,18 @@ pub fn handle_pokemon_client(
             Ok(_) => (), // would return usize with number read bytes
         };
 
-        stream.write(line.as_bytes())?;
+        line = line.trim().to_string();
+
+        println!("read {}", line);
+
+        //stream.write(line.as_bytes())?;
         stream.flush()?;
 
         //line.trim()
 
         if line.to_lowercase().starts_with("quit") {
             // send quit
-            stream.write(b"Bye")?;
+            stream.write(b"Bye\n")?;
             tx.send(message.new_message(MessageBody::CLOSE)).unwrap();
             break; // exit loop
         } else if line.to_lowercase().starts_with("identify") {
@@ -106,9 +111,14 @@ pub fn handle_pokemon_client(
                     txOwn = None;
                 }
                 None => {
-                    stream.write(b"Error")?;
+                    stream.write(b"Error\n")?;
                 }
             }
+        } else if line.to_lowercase().starts_with("join") {
+            let group = line[5..].to_string();
+            tx.send(message.new_message(MessageBody::AttachToGroup(group))).unwrap();
+        } else {
+            stream.write(b"Unknown command\n").unwrap();
         }
     }
     stream.flush()?;
@@ -233,16 +243,15 @@ pub fn server_client(rx: mpsc::Receiver<Message>, verbose: u8) {
                             // remove client from group
                             match client.room {
                                 Some(room) => {
-                                    match groups.get(&room) {
-                                        Some(grpup) => {
+                                    match groups.get_mut(&room) {
+                                        Some(group) => {
                                             if verbose >= 3 {
                                                 println!(
                                                     "debug3: remove client from group {}",
                                                     room
                                                 );
                                             }
-                                            //groups[room].
-                                            // TODO: delete from groups
+                                            group.retain(|x| x != &recv.id);    // remove user from group
                                         }
                                         None => (),
                                     }
