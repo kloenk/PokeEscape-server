@@ -88,7 +88,7 @@ fn main() {
         std::process::exit(0);
     }
 
-    drop(app); // destroy app
+    drop(app); // destroy app variable
 
     if let Some(_) = matches.subcommand_matches("license") {
         show_license();
@@ -108,6 +108,7 @@ fn main() {
         0 => config.verbose = false,
         1 | _ => config.verbose = true,
     };
+    config.verbosity_level = matches.occurrences_of("verbose") as u8;
 
     if let Some(port) = matches.value_of("port") {
         if let Ok(port) = port.parse::<u16>() {
@@ -160,17 +161,18 @@ fn completion(args: &clap::ArgMatches, app: &mut App) {
         shell = Shell::Bash;
     }
 
-    use std::io::Write;
-    use std::io::BufWriter;
     use std::fs::File;
+    use std::io::BufWriter;
+    use std::io::Write;
 
     let mut path = BufWriter::new(match args.value_of("out") {
-        Some(x) => Box::new(File::create(&std::path::Path::new(x)).unwrap_or_else(|err| {
-            eprintln!("Error opening file: {}", err);
-            std::process::exit(1);
-        })) as Box<Write>,
+        Some(x) => Box::new(
+            File::create(&std::path::Path::new(x)).unwrap_or_else(|err| {
+                eprintln!("Error opening file: {}", err);
+                std::process::exit(1);
+            }),
+        ) as Box<Write>,
         None => Box::new(std::io::stdout()) as Box<Write>,
-        
     });
 
     app.gen_completions_to("poke_escape_server", shell, &mut path);
@@ -187,4 +189,3 @@ PokeEscape-server  Copyright (C) 2019  Finn Behrens,
     under certain conditions;",
     )
 }
- 

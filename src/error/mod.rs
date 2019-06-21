@@ -131,6 +131,22 @@ impl std::convert::From<semver::SemVerError> for Error {
     }
 }
 
+impl std::convert::From<std::sync::mpsc::SendError<super::server::Message>> for Error {
+    fn from(err: std::sync::mpsc::SendError<super::server::Message>) -> Self {
+        Error {
+            my_kind: ErrorKind::SendError(err.to_string()),
+        }
+    }
+}
+
+impl std::convert::From<std::sync::mpsc::RecvError> for Error {
+    fn from(_err: std::sync::mpsc::RecvError) -> Self {
+        Error {
+            my_kind: ErrorKind::ReceiveError,
+        }
+    }
+}
+
 /// implement std::cmp::PartialEq for Error to provied the `==` operator
 impl std::cmp::PartialEq for Error {
     fn eq(&self, other: &Error) -> bool {
@@ -219,6 +235,13 @@ pub enum ErrorKind {
     /// contains true if it wasn't a terminate instruction
     PoolSendError(bool),
 
+    /// SendError raised when mpsc encounters a problem
+    /// hold the data send as string
+    SendError(String),
+
+    /// ReceiveError reaise when mpsc cannot receive any data
+    ReceiveError,
+
     /// Other error, used for string to error conversion
     Other(String),
 
@@ -260,6 +283,7 @@ impl ErrorKind {
             },
             ErrorKind::Other(data) => format!("Other({})", data),
             ErrorKind::Unknown(data) => format!("Unknown({})", data),
+            _ => format!("Not covered??!!!\n"),
         }
     }
 

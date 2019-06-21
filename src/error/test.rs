@@ -1,3 +1,5 @@
+//! test file to test some things around error
+
 mod io_error_kind_to_error_kind {
     use super::super::ErrorKind;
     use std::io::ErrorKind as IoErrorKind;
