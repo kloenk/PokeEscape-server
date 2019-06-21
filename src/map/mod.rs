@@ -75,6 +75,7 @@ impl MapPlaces {
     }
 
     /// returns the pointer to a specific map
+    #[allow(dead_code)]
     fn get_map(&self, name: String) -> Result<Map> {
         match self.p_maps.get(&name) {
             // FIXME foo
@@ -199,6 +200,7 @@ struct MapInfo {
     p_version: Version,
 
     /// format of the given map file
+    #[allow(dead_code)]
     p_format: MapFormat,
 
     /// author of the map
@@ -232,16 +234,19 @@ impl MapInfo {
     /// Read toml value and returns a HashMap with the maps specified in the toml file
     pub fn from_conf(toml: &toml::Value, verbose: bool) -> Result<HashMap<String, Self>> {
         if toml["Maps"].get("maps") == None {
+            // check if maps definition exists
             return Err(Error::new_field_not_exists("Maps.maps".to_string()));
         }
 
         let maps_names = match toml["Maps"]["maps"].as_array() {
+            // get maps definition
             Some(maps) => maps,
             None => return Err(Error::new_field_not_exists("Maps.maps".to_string())),
         };
 
         let mut maps = HashMap::new();
 
+        // parse maps
         for map in maps_names {
             let map = match map.as_str() {
                 Some(map) => map,
@@ -255,6 +260,7 @@ impl MapInfo {
                 print!("Loading infos of map {}... ", map.green());
             }
 
+            // check for metadata of map
             if toml.get(map) == None {
                 if verbose {
                     println!("[{}]: {}", "failed".red(), "not found in config".red());
@@ -264,6 +270,7 @@ impl MapInfo {
                 continue;
             }
 
+            // pasrse map metadata
             let map = match Self::from_conf_one(&toml[map], map.to_string(), verbose) {
                 Ok(map) => map,
                 Err(err) => {
@@ -280,7 +287,7 @@ impl MapInfo {
                 );
             }
 
-            maps.insert(map.name().clone(), map);
+            maps.insert(map.name().clone(), map); // add to hashmap
         }
 
         Ok(maps)
@@ -377,12 +384,14 @@ impl MapInfo {
     }
 
     /// set the map into verbose mode
+    #[allow(dead_code)]
     pub fn verbose(&mut self) -> &mut Self {
         self.p_verbose = true;
         self
     }
 
     /// returns the verbose state of the Map
+    #[allow(dead_code)]
     pub fn is_verbose(&self) -> bool {
         self.p_verbose
     }
@@ -401,6 +410,7 @@ impl MapInfo {
     }
 
     /// get_map returns a finish map object ready to be send
+    #[allow(dead_code)]
     pub fn get_map(&self) -> Result<Map> {
         Err(Error::new_field_not_exists("code".to_string()))
     }
@@ -528,7 +538,7 @@ impl MapInfo {
 }
 
 /// map format is a enum of possible loader elements for a map file
-enum MapFormat {
+pub enum MapFormat {
     /// JSON as the javascript object notation
     JSON,
 }

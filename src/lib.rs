@@ -6,6 +6,7 @@
 use colored::*;
 use std::net::TcpListener;
 use std::process;
+use std::sync::mpsc;
 
 /// general tcp module for talking with the client and negotiating the
 /// protocoll to use
@@ -31,6 +32,9 @@ pub struct Config {
     /// enables verbose mode
     pub verbose: bool,
 
+    /// verbosity level
+    pub verbosity_level: u8,
+
     /// defines the number of thread in ThreadPool to use
     pub threads: usize,
 
@@ -45,6 +49,7 @@ impl Config {
             port: 1996,
             host: "127.0.0.1".to_string(),
             verbose: false,
+            verbosity_level: 0,
             threads: 8,
             config: "./config.toml".to_string(),
         }
@@ -69,6 +74,7 @@ impl Config {
         }
 
         // load maps
+        #[allow(unused_variables)]
         let maps = match map::MapPlaces::new(&self.config, self.verbose) {
             Ok(maps) => maps,
             Err(err) => {
@@ -98,20 +104,38 @@ impl Config {
             self.port.to_string().green()
         );
         // open socket
-        let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap(); //FIXME: !!!
+        let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap_or_else(|err| {
+            eprintln!("could not bind to port: {}", err);
+            std::process::exit(20);
+        }); //FIXME: !!!
+
+        // create channel
+        let (tx, rx) = mpsc::channel();
+
+        // create handle thread
+        server::server_client(rx, self.verbosity_level, maps); // FIXME: verbosity level
 
         // handle incomming streams
         for stream in listener.incoming() {
-            let stream = stream.unwrap(); // FIXME: unwrap
+            let stream = match stream {
+                Ok(stream) => stream,
+                Err(err) => {
+                    eprintln!("error creating stream: {}", err);
+                    continue;
+                }
+            };
             let conf = server::Job {
                 stream,
                 verbose: self.verbose,
+                sender: mpsc::Sender::clone(&tx),
             };
 
             // execute Job in ThreadPool
             thread_pool
                 .execute(move || {
-                    server::negotiate(conf).unwrap(); //FIXME: unwrap
+                    server::negotiate(conf).unwrap_or_else(|err| {
+                        eprintln!("error while executing client handler: {}", err)
+                    });
                 })
                 .unwrap(); // FIXME: unwrap
         }
