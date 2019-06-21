@@ -41,7 +41,7 @@ pub fn negotiate(mut conf: Job) -> Result<()> {
         let requirment = VersionReq::parse("<= 0.1.0").unwrap();
 
         if requirment.matches(&clientv) {
-            handle_pokemon_client(conf.stream.try_clone()?, conf.sender);
+            handle_pokemon_client(conf.stream.try_clone()?, conf.sender)?;
         } else {
             conf.stream.write(b"Protocol mismatch.\n")?;
         }
@@ -57,14 +57,14 @@ pub fn negotiate(mut conf: Job) -> Result<()> {
 /// starts the connection to the client
 pub fn handle_pokemon_client(
     mut stream: TcpStream,
-    mut tx: mpsc::Sender<Message>,
+    tx: mpsc::Sender<Message>,
 ) -> Result<TcpStream> {
-    let mut reader = BufReader::new(stream.try_clone().unwrap()); //FIXME: unwrap
+    let mut reader = BufReader::new(stream.try_clone()?);
 
     // create channel
     let (txOwn, rx) = mpsc::channel();
     let mut txOwn = Some(txOwn); // encase in Option<T> so it can move out of scope in a controlled way
-    let mut isIdentified = false; // set to true when it is identified to master thread
+    let isIdentified = false; // set to true when it is identified to master thread
 
 
     let mut message = Message::empty();
@@ -73,7 +73,7 @@ pub fn handle_pokemon_client(
         // create empty buffer for recieved line
         let mut line = String::new();
 
-        match reader.read_line(&mut line) {
+        match reader.read_line(&mut line) { // read from client
             Err(_err) => {
                 return Err(Error::new_field_not_exists(
                     "fix error handling".to_string(),
@@ -89,12 +89,10 @@ pub fn handle_pokemon_client(
         //stream.write(line.as_bytes())?;
         stream.flush()?;
 
-        //line.trim()
-
         if line.to_lowercase().starts_with("quit") {
             // send quit
             stream.write(b"Bye\n")?;
-            tx.send(message.new_message(MessageBody::CLOSE)).unwrap();
+            tx.send(message.new_message(MessageBody::CLOSE))?;
             break; // exit loop
         } else if line.to_lowercase().starts_with("identify") {
             /*if !isIdentified {
@@ -106,8 +104,7 @@ pub fn handle_pokemon_client(
                 Some(txO) => {
                     let id = line[9..].to_string();
                     message = Message::new_id(id.clone());
-                    tx.send(message.new_message(MessageBody::IDENTIFY(Ident::new(id, txO))))
-                        .unwrap();
+                    tx.send(message.new_message(MessageBody::IDENTIFY(Ident::new(id, txO))))?;
                     //tx.send(Message::IDENTIFY(Ident::new(id, txO))).unwrap();
                     txOwn = None;
                 }
@@ -117,23 +114,23 @@ pub fn handle_pokemon_client(
             }
         } else if line.to_lowercase().starts_with("join") {
             let group = line[5..].to_string();
-            tx.send(message.new_message(MessageBody::AttachToGroup(group))).unwrap();
+            tx.send(message.new_message(MessageBody::AttachToGroup(group)))?;
         } else if line.to_lowercase().starts_with("map") {
             let map = line[4..].to_string();
-            tx.send(message.new_message(MessageBody::GetMap(map))).unwrap();
-            let msg = rx.recv().unwrap();
+            tx.send(message.new_message(MessageBody::GetMap(map)))?;
+            let msg = rx.recv()?;
             match msg.message {
                 MessageBody::Err(_err) => {
-                    stream.write(b"error could not load map\n").unwrap();
+                    stream.write(b"error could not load map\n")?;
                 },
                 MessageBody::Map(map) => {
-                    stream.write(format!("map {}\n", map).as_bytes()).unwrap();
+                    stream.write(format!("map {}\n", map).as_bytes())?;
                 },
                 _ => {},
             };
             stream.flush()?;
         } else {
-            stream.write(b"Unknown command\n").unwrap();
+            stream.write(b"Unknown command\n")?;
         }
     }
     stream.flush()?;
@@ -206,6 +203,14 @@ impl Message {
             id: String::from("00001"),
             message: MessageBody::CLOSE,
         }
+    }
+}
+
+/// implement std::fmt::Display to allow printing and to_string()
+impl std::fmt::Display for Message {
+    /// standart formater for print! macro
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "Message from {}", self.id) // TODO: create a more readable output
     }
 }
 
@@ -331,7 +336,9 @@ pub fn server_client(rx: mpsc::Receiver<Message>, verbose: u8, maps: MapPlaces) 
                             channel.send(Message {
                                 id: "master".to_string(),
                                 message: MessageBody::Map(map.to_string()),
-                            }).unwrap();
+                            }).unwrap_or_else(|err| {
+                                eprintln!("could not send map to {}: {}", &recv.id, err);
+                            });
                         },
                         Err(err) => {
                             if verbose >= 3 {
@@ -341,7 +348,9 @@ pub fn server_client(rx: mpsc::Receiver<Message>, verbose: u8, maps: MapPlaces) 
                             channel.send(Message{
                                 id: "master".to_string(),
                                 message: MessageBody::Err("could not load map".to_string()),
-                            }).unwrap();    //FIXME: unwrap
+                            }).unwrap_or_else(|err| {
+                                eprintln!("could not send map error to {}: {}", &recv.id, err)
+                            });
                         }
                     };
                 }

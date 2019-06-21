@@ -233,17 +233,18 @@ impl MapInfo {
 
     /// Read toml value and returns a HashMap with the maps specified in the toml file
     pub fn from_conf(toml: &toml::Value, verbose: bool) -> Result<HashMap<String, Self>> {
-        if toml["Maps"].get("maps") == None {
+        if toml["Maps"].get("maps") == None {   // check if maps definition exists
             return Err(Error::new_field_not_exists("Maps.maps".to_string()));
         }
 
-        let maps_names = match toml["Maps"]["maps"].as_array() {
+        let maps_names = match toml["Maps"]["maps"].as_array() {    // get maps definition
             Some(maps) => maps,
             None => return Err(Error::new_field_not_exists("Maps.maps".to_string())),
         };
 
         let mut maps = HashMap::new();
 
+        // parse maps
         for map in maps_names {
             let map = match map.as_str() {
                 Some(map) => map,
@@ -257,6 +258,7 @@ impl MapInfo {
                 print!("Loading infos of map {}... ", map.green());
             }
 
+            // check for metadata of map
             if toml.get(map) == None {
                 if verbose {
                     println!("[{}]: {}", "failed".red(), "not found in config".red());
@@ -266,6 +268,7 @@ impl MapInfo {
                 continue;
             }
 
+            // pasrse map metadata
             let map = match Self::from_conf_one(&toml[map], map.to_string(), verbose) {
                 Ok(map) => map,
                 Err(err) => {
@@ -282,7 +285,7 @@ impl MapInfo {
                 );
             }
 
-            maps.insert(map.name().clone(), map);
+            maps.insert(map.name().clone(), map); // add to hashmap
         }
 
         Ok(maps)

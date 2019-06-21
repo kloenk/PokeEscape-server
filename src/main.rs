@@ -88,7 +88,7 @@ fn main() {
         std::process::exit(0);
     }
 
-    drop(app); // destroy app
+    drop(app); // destroy app variable
 
     if let Some(_) = matches.subcommand_matches("license") {
         show_license();
