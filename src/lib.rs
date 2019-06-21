@@ -104,7 +104,10 @@ impl Config {
             self.port.to_string().green()
         );
         // open socket
-        let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap(); //FIXME: !!!
+        let listener = TcpListener::bind(format!("{}:{}", self.host, self.port)).unwrap_or_else(|err| {
+            eprintln!("could not bind to port: {}", err);
+            std::process::exit(20);
+        }); //FIXME: !!!
 
         // create channel
         let (tx, rx) = mpsc::channel();
@@ -114,7 +117,13 @@ impl Config {
 
         // handle incomming streams
         for stream in listener.incoming() {
-            let stream = stream.unwrap(); // FIXME: unwrap
+            let stream = match stream {
+                Ok(stream) => stream,
+                Err(err) => {
+                    eprintln!("error creating stream: {}", err);
+                    continue;
+                }
+            };
             let conf = server::Job {
                 stream,
                 verbose: self.verbose,
@@ -124,7 +133,9 @@ impl Config {
             // execute Job in ThreadPool
             thread_pool
                 .execute(move || {
-                    server::negotiate(conf).unwrap(); //FIXME: unwrap
+                    server::negotiate(conf).unwrap_or_else(|err| {
+                        eprintln!("error while executing client handler: {}", err)
+                    });
                 })
                 .unwrap(); // FIXME: unwrap
         }
