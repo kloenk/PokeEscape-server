@@ -5,6 +5,7 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::net::TcpStream;
 use std::sync::mpsc;
+use super::map::MapPlaces;
 
 use super::error::Error;
 
@@ -117,6 +118,20 @@ pub fn handle_pokemon_client(
         } else if line.to_lowercase().starts_with("join") {
             let group = line[5..].to_string();
             tx.send(message.new_message(MessageBody::AttachToGroup(group))).unwrap();
+        } else if line.to_lowercase().starts_with("map") {
+            let map = line[4..].to_string();
+            tx.send(message.new_message(MessageBody::GetMap(map))).unwrap();
+            let msg = rx.recv().unwrap();
+            match msg.message {
+                MessageBody::Err(_err) => {
+                    stream.write(b"error could not load map\n").unwrap();
+                },
+                MessageBody::Map(map) => {
+                    stream.write(format!("map {}\n", map).as_bytes()).unwrap();
+                },
+                _ => {},
+            };
+            stream.flush()?;
         } else {
             stream.write(b"Unknown command\n").unwrap();
         }
@@ -206,6 +221,16 @@ pub enum MessageBody {
 
     /// Command to attach to group
     AttachToGroup(String),
+
+    /// send map to client
+    GetMap(String),
+
+    /// loaded map to return to client
+    Map(String),
+
+    /// error with error description
+    /// used for example if map could not be loaded
+    Err(String),
 }
 
 /// struct used in hashmap of the coordinator
@@ -225,7 +250,7 @@ impl Client {
 }
 
 /// handle interclient communication
-pub fn server_client(rx: mpsc::Receiver<Message>, verbose: u8) {
+pub fn server_client(rx: mpsc::Receiver<Message>, verbose: u8, maps: MapPlaces) {
     std::thread::spawn(move || {
         // hashmap containing the induvidual clients
         let mut clients: HashMap<String, Client> = HashMap::new();
@@ -286,6 +311,37 @@ pub fn server_client(rx: mpsc::Receiver<Message>, verbose: u8) {
                             let mut vec = Vec::new();
                             vec.push(recv.id);
                             groups.insert(group, vec);
+                        }
+                    };
+                }
+                MessageBody::GetMap(map) => {
+                    if verbose >= 2 {
+                        println!("debug2: load map {}", map);
+                    }
+                    let channel = match clients.get(&recv.id) {
+                        Some(client) => &client.tx,
+                        None => {
+                            eprintln!("client {} not available to get tx channel", &recv.id);
+                            continue;
+                        },
+                    };
+                    match maps.get(&map) {
+                        Ok(map) => {
+                            // return map as json
+                            channel.send(Message {
+                                id: "master".to_string(),
+                                message: MessageBody::Map(map.to_string()),
+                            }).unwrap();
+                        },
+                        Err(err) => {
+                            if verbose >= 3 {
+                                eprintln!("debug3: could not load map: {}", err);
+                            }
+                            // send error back
+                            channel.send(Message{
+                                id: "master".to_string(),
+                                message: MessageBody::Err("could not load map".to_string()),
+                            }).unwrap();    //FIXME: unwrap
                         }
                     };
                 }

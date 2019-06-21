@@ -110,7 +110,7 @@ impl Config {
         let (tx, rx) = mpsc::channel();
 
         // create handle thread
-        server::server_client(rx, self.verbosity_level); // FIXME: verbosity level
+        server::server_client(rx, self.verbosity_level, maps); // FIXME: verbosity level
 
         // handle incomming streams
         for stream in listener.incoming() {
