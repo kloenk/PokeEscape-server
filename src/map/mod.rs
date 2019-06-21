@@ -233,11 +233,13 @@ impl MapInfo {
 
     /// Read toml value and returns a HashMap with the maps specified in the toml file
     pub fn from_conf(toml: &toml::Value, verbose: bool) -> Result<HashMap<String, Self>> {
-        if toml["Maps"].get("maps") == None {   // check if maps definition exists
+        if toml["Maps"].get("maps") == None {
+            // check if maps definition exists
             return Err(Error::new_field_not_exists("Maps.maps".to_string()));
         }
 
-        let maps_names = match toml["Maps"]["maps"].as_array() {    // get maps definition
+        let maps_names = match toml["Maps"]["maps"].as_array() {
+            // get maps definition
             Some(maps) => maps,
             None => return Err(Error::new_field_not_exists("Maps.maps".to_string())),
         };

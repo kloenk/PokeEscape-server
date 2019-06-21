@@ -140,7 +140,7 @@ impl std::convert::From<std::sync::mpsc::SendError<super::server::Message>> for 
 }
 
 impl std::convert::From<std::sync::mpsc::RecvError> for Error {
-    fn from(err: std::sync::mpsc::RecvError) -> Self {
+    fn from(_err: std::sync::mpsc::RecvError) -> Self {
         Error {
             my_kind: ErrorKind::ReceiveError,
         }
@@ -283,6 +283,7 @@ impl ErrorKind {
             },
             ErrorKind::Other(data) => format!("Other({})", data),
             ErrorKind::Unknown(data) => format!("Unknown({})", data),
+            _ => format!("Not covered??!!!\n"),
         }
     }
 

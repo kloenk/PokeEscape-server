@@ -1,3 +1,4 @@
+use super::map::MapPlaces;
 use colored::*;
 use semver::{Version, VersionReq};
 use std::collections::HashMap;
@@ -5,7 +6,6 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::net::TcpStream;
 use std::sync::mpsc;
-use super::map::MapPlaces;
 
 use super::error::Error;
 
@@ -62,10 +62,10 @@ pub fn handle_pokemon_client(
     let mut reader = BufReader::new(stream.try_clone()?);
 
     // create channel
+    #[allow(non_snake_case)]
     let (txOwn, rx) = mpsc::channel();
+    #[allow(non_snake_case)]
     let mut txOwn = Some(txOwn); // encase in Option<T> so it can move out of scope in a controlled way
-    let isIdentified = false; // set to true when it is identified to master thread
-
 
     let mut message = Message::empty();
 
@@ -73,7 +73,8 @@ pub fn handle_pokemon_client(
         // create empty buffer for recieved line
         let mut line = String::new();
 
-        match reader.read_line(&mut line) { // read from client
+        match reader.read_line(&mut line) {
+            // read from client
             Err(_err) => {
                 return Err(Error::new_field_not_exists(
                     "fix error handling".to_string(),
@@ -101,10 +102,10 @@ pub fn handle_pokemon_client(
                 isIdentified = true;
             }*/
             match txOwn {
-                Some(txO) => {
+                Some(tx_o) => {
                     let id = line[9..].to_string();
                     message = Message::new_id(id.clone());
-                    tx.send(message.new_message(MessageBody::IDENTIFY(Ident::new(id, txO))))?;
+                    tx.send(message.new_message(MessageBody::IDENTIFY(Ident::new(id, tx_o))))?;
                     //tx.send(Message::IDENTIFY(Ident::new(id, txO))).unwrap();
                     txOwn = None;
                 }
@@ -122,11 +123,11 @@ pub fn handle_pokemon_client(
             match msg.message {
                 MessageBody::Err(_err) => {
                     stream.write(b"error could not load map\n")?;
-                },
+                }
                 MessageBody::Map(map) => {
                     stream.write(format!("map {}\n", map).as_bytes())?;
-                },
-                _ => {},
+                }
+                _ => {}
             };
             stream.flush()?;
         } else {
@@ -281,7 +282,7 @@ pub fn server_client(rx: mpsc::Receiver<Message>, verbose: u8, maps: MapPlaces) 
                                                     room
                                                 );
                                             }
-                                            group.retain(|x| x != &recv.id);    // remove user from group
+                                            group.retain(|x| x != &recv.id); // remove user from group
                                         }
                                         None => (),
                                     }
@@ -328,29 +329,33 @@ pub fn server_client(rx: mpsc::Receiver<Message>, verbose: u8, maps: MapPlaces) 
                         None => {
                             eprintln!("client {} not available to get tx channel", &recv.id);
                             continue;
-                        },
+                        }
                     };
                     match maps.get(&map) {
                         Ok(map) => {
                             // return map as json
-                            channel.send(Message {
-                                id: "master".to_string(),
-                                message: MessageBody::Map(map.to_string()),
-                            }).unwrap_or_else(|err| {
-                                eprintln!("could not send map to {}: {}", &recv.id, err);
-                            });
-                        },
+                            channel
+                                .send(Message {
+                                    id: "master".to_string(),
+                                    message: MessageBody::Map(map.to_string()),
+                                })
+                                .unwrap_or_else(|err| {
+                                    eprintln!("could not send map: {}", err);
+                                });
+                        }
                         Err(err) => {
                             if verbose >= 3 {
                                 eprintln!("debug3: could not load map: {}", err);
                             }
                             // send error back
-                            channel.send(Message{
-                                id: "master".to_string(),
-                                message: MessageBody::Err("could not load map".to_string()),
-                            }).unwrap_or_else(|err| {
-                                eprintln!("could not send map error to {}: {}", &recv.id, err)
-                            });
+                            channel
+                                .send(Message {
+                                    id: "master".to_string(),
+                                    message: MessageBody::Err("could not load map".to_string()),
+                                })
+                                .unwrap_or_else(|err| {
+                                    eprintln!("could not send map error: {}", err)
+                                });
                         }
                     };
                 }
