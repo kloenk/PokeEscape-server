@@ -10,7 +10,7 @@ edition = "2018"
 clap = {version = "2.33.0", features = ["color"]}
 colored = "1.8.0"
 semver = "0.9.0"
-serde_json = "1.0.39"
+serde_json = "1.0.40"
 serde = "1.0.92"
 serde_derive = "1.0.92"
 toml = "0.5.1"
